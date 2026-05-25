@@ -4,7 +4,11 @@
     <TargetFrameworks>net8.0; net9.0; net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>1.0.1</Version>
+	<Version>1.0.2</Version>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageProjectUrl>https://github.com/MilesFan/BlazorAccessControl</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/MilesFan/BlazorAccessControl</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
