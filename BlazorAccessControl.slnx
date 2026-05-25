@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="BlazorAccessControl.Interface/BlazorAccessControl.Interface.csproj" />
+  <Project Path="BlazorAccessControl.UI/BlazorAccessControl.UI.csproj" Id="10aa5dc1-fd6c-4ce7-a855-f907950af3d6" />
 </Solution>
