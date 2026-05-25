@@ -8,9 +8,9 @@ namespace BlazorAccessControl.Interface
     {
         public IUser? CurrentUser { get; }
 
-        public ICollection<IUser> GetAllUsers();
+        public Task<ICollection<IUser>> GetAllUsersAsync();
 
-        public IUser? GetUserById(string id);
+        public Task<IUser?> GetUserByIdAsync(string id);
 
         public Task AddUser();
 
