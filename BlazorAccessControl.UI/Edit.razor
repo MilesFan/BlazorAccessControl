@@ -1,0 +1,164 @@
+﻿@typeparam TUser where TUser : IUser, new()
+@inject IJSRuntime js
+@inject IUserService userService
+<dialog @ref="dialogRef" style="margin:auto; border: 1px solid rgb(222, 226, 230); border-radius: 6px; border: 1px solid gray; outline: none;">
+@if (!isLoading && User is null)
+{
+    <p>未找到指定用户</p>
+}
+else if (isLoading)
+{
+    <p>加载中...</p>
+}
+else if (User is not null)
+{
+    <div class="container">
+        <div class="input-group border-rounded">
+            <label for="displayName">姓名</label>
+            <input id="displayName" @bind="User.DisplayName" autocomplete="off" autocorrect="off" />
+        </div>
+        <div class="input-group border-rounded">
+            <label for="userName">账号</label>
+            <input id="userName" @bind="User.UserName" autocomplete="off" autocorrect="off" />
+        </div>
+        <div class="input-group border-rounded">
+            <label for="email">Email</label>
+            <input id="email" type="email" @bind="User.Email" autocomplete="off" autocorrect="off" />
+        </div>
+        <div class="input-group border-rounded">
+            <label for="email">角色</label>
+            <div class="role-item-group">
+            @foreach (var roleInfo in RoleInfos)
+            {
+                <label class="role-item">@roleInfo.Role.Name <input type="checkbox" @bind="roleInfo.Checked" /></label>
+            }
+            </div>
+        </div>
+        <div class="input-group border-rounded">
+            <label>新密码</label>
+            <input type="password" @bind="NewPassword" autocomplete="off" autocorrect="off" />
+        </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; padding: 1rem 2rem 1rem 2rem; margin-top: 10px;">
+        <button class="button" @onclick="SaveAsync">保存</button>
+        <button class="button" @onclick="CancelAsync">取消</button>
+        @if (!isNew)
+        {
+            <PDFinder.Components.Pages.ProblemComponents.ConfirmationDialog ButtonText="删除" ButtonClass="button" Message="确认删除" OnConfirm="DeleteAsync" />
+        }
+    </div>
+}
+</dialog>
+
+@code {
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnChange { get; set; }
+
+    private bool isNew = false;
+    private bool isLoading = true;
+    private IUser? User;
+    private ElementReference dialogRef = default!;
+    private class RoleInfo
+    {
+        public bool Checked { get; set; }
+        public required IRole Role { get; init; }
+    }
+    private IReadOnlyCollection<RoleInfo> RoleInfos { get; set; } = Array.Empty<RoleInfo>();
+    private string? NewPassword;
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        bool needReload = false;
+        foreach(var parameter in parameters)
+        {
+            if (parameter.Name == nameof(Id))
+            {
+                var value = parameter.Value as string;
+                if (value!=Id)
+                {
+                    needReload = true;
+                    Id = value;
+                }
+            }
+            else if (parameter.Name == nameof(OnChange))
+            {
+                OnChange = (EventCallback<bool>)parameter.Value;
+            }
+        }
+        if (needReload)
+        {
+            _ = Task.Run(ReloadAsync);
+        }
+        await base.SetParametersAsync(parameters);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var dialogElement = await js.InvokeAsync<IJSObjectReference>("eval", dialogRef);
+            await dialogElement.InvokeVoidAsync("showModal");
+        }
+    }
+    private async Task ReloadAsync()
+    {
+        NewPassword = null;
+        if (Id is null || Id == "new")
+        {
+            isNew = true;
+            User = new TUser { DisplayName = string.Empty };
+        }
+        else
+        {
+            isNew = false;
+            User = await userService.GetUserByIdAsync(Id) ?? throw new Exception("User Not Found");
+        }
+        var UserRoles = await userService.GetRolesAsync(User!);
+        var allRoles = await userService.GetAllRolesAsync();
+        RoleInfos = allRoles.Select(role => new RoleInfo { Role = role, Checked = UserRoles.Any(ur => role.Name == ur.Name) }).ToArray();
+        isLoading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+    private async Task SaveAsync()
+    {
+        if (User is null) return;
+        try
+        {
+            if (Id is null)
+            {
+                await userService.CreateUserAsync(User);
+            }
+            else
+            {
+                await userService.UpdateUserAsync(User);
+            }
+        }
+        catch (Exception ex)
+        {
+            await js.InvokeVoidAsync("alert", $"保存失败: {ex.Message}");
+            return;
+        }
+        if (OnChange.HasDelegate) await OnChange.InvokeAsync(true);
+    }
+    private async Task CancelAsync()
+    {
+        User = null;
+        if (OnChange.HasDelegate) await OnChange.InvokeAsync(false);
+    }
+    private async Task DeleteAsync()
+    {
+        if (User is null) return;
+        try
+        {
+            await userService.DeleteUserByIdAsync(User.Id);
+        }
+        catch (Exception ex)
+        {
+            await js.InvokeVoidAsync("alert", $"删除失败: {ex.Message}");
+            return;
+        }
+        if (OnChange.HasDelegate) await OnChange.InvokeAsync(true);
+    }
+}

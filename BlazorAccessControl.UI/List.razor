@@ -1,0 +1,81 @@
+@typeparam TUser where TUser : IUser, new()
+@inject IUserService userService
+@inject IJSRuntime js
+<div style="display:flex; gap: 10px; margin-bottom: 1rem;">
+    <button @onclick="@(() => StartEditUser("new"))" class="button shadow">创建用户</button>
+</div>
+<div style="display:flex; flex-direction:row; column-gap: 20px;align-items: start;">
+    <table class="shadow">
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>账号</th>
+                <th>Email</th>
+                <th>角色</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in users)
+            {
+                <tr>
+                    <td>@item.DisplayName</td>
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    <td>@string.Join(',', item.UserRoles.Select(r=>r.Role.Name))</td>
+                    <td><button @onclick="() => StartEditUser(item.Id)">修改</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (userIdInEdit!=null)
+    {
+        <Edit TUser="TUser" Id="@userIdInEdit" OnChange="OnEditComponentChanged" />
+    }
+    else if (roleIdInEdit!=null)
+    {
+        <Edit TUser="TUser" Id="@userIdInEdit" OnChange="OnEditComponentChanged" />
+    }
+</div>
+
+@code {
+    private ICollection<IUser> users = Array.Empty<IUser>();
+    private string? userIdInEdit;
+    private string? roleIdInEdit;
+    public class UserWithRoles
+    {
+        public required IUser User { get; set; }
+        public IList<string> Roles { get; set; } = Array.Empty<string>();
+    }
+    private async Task StartEditUser(string userId)
+    {
+        userIdInEdit = userId;
+        roleIdInEdit = null;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+    private async Task OnEditComponentChanged(bool needReload)
+    {
+        userIdInEdit = null;
+        roleIdInEdit = null;
+        if (needReload)
+        {
+            await ReloadAsync();
+        }
+    }
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            users = await userService.GetAllUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            users = Array.Empty<IUser>();
+            await js.InvokeVoidAsync("alert", $"加载用户失败: {ex.Message}");
+        }
+    }
+
+}
