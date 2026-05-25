@@ -7,5 +7,18 @@ namespace BlazorAccessControl.Interface
     public interface IUserService
     {
         public IUser? CurrentUser { get; }
+
+        public ICollection<IUser> GetAllUsers();
+
+        public IUser? GetUserById(string id);
+
+        public Task AddUser();
+
+        public Task UpdateUser(IUser user);
+
+        public Task DeleteUserById(string id);
+        
+        public Task SignIn(IUser user);
+        public Task SignOut(IUser user);
     }
 }
