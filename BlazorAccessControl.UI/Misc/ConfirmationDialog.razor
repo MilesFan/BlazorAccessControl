@@ -28,8 +28,6 @@
 
     private string dialogId = $"dialog_{Guid.NewGuid().ToString()}";
 
-    private ElementReference dialogRef = default!;
-
     private async Task Confirm()
     {
         if (OnConfirm.HasDelegate == false) return;
