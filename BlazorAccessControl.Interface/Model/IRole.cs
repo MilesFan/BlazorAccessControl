@@ -9,7 +9,7 @@ namespace BlazorAccessControl.Interface
     public interface IRole
     {
         public string Id { get; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
     }
 }
