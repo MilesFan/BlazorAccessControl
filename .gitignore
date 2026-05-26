@@ -6,3 +6,6 @@
 /Example/database.db
 /Example/database.db-shm
 /Example/database.db-wal
+/Example/bin
+/Example/Migrations
+/Example/obj
