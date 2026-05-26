@@ -2,10 +2,16 @@
 @inject IUserService userService
 @inject IJSRuntime js
 <div style="display:flex; gap: 10px; margin-bottom: 1rem;">
-    <button @onclick="@(() => StartEditUser("new"))" class="button shadow">创建用户</button>
+    <button @onclick="@(() => Edit("new"))">新建</button>
 </div>
 <div style="display:flex; flex-direction:row; column-gap: 20px;align-items: start;">
-    <table class="shadow">
+    <table>
+        <colgroup>
+            <col style="min-width: 10rem;" />
+            <col style="min-width: 10rem;" />
+            <col style="min-width: 10rem;" />
+            <col style="min-width: 10rem;" />
+        </colgroup>
         <thead>
             <tr>
                 <th>姓名</th>
@@ -22,8 +28,8 @@
                     <td>@item.DisplayName</td>
                     <td>@item.UserName</td>
                     <td>@item.Email</td>
-                    <td>@string.Join(',', item.UserRoles.Select(r=>r.Role.Name))</td>
-                    <td><button @onclick="() => StartEditUser(item.Id)">修改</button></td>
+                    <td>@string.Join(',', item.GetRoles().Select(r=>r.Name))</td>
+                    <td><button @onclick="() => Edit(item.Id)">修改</button></td>
                 </tr>
             }
         </tbody>
@@ -37,7 +43,6 @@
         <Edit TUser="TUser" Id="@userIdInEdit" OnChange="OnEditComponentChanged" />
     }
 </div>
-
 @code {
     private ICollection<IUser> users = Array.Empty<IUser>();
     private string? userIdInEdit;
@@ -47,9 +52,9 @@
         public required IUser User { get; set; }
         public IList<string> Roles { get; set; } = Array.Empty<string>();
     }
-    private async Task StartEditUser(string userId)
+    private async Task Edit(string id)
     {
-        userIdInEdit = userId;
+        userIdInEdit = id;
         roleIdInEdit = null;
     }
     protected override async Task OnInitializedAsync()
@@ -74,7 +79,8 @@
         catch (Exception ex)
         {
             users = Array.Empty<IUser>();
-            await js.InvokeVoidAsync("alert", $"加载用户失败: {ex.Message}");
+            Console.Error.WriteLine($"加载用户失败: {ex}");
+            //await js.InvokeVoidAsync("alert", $"加载用户失败: {ex.Message}");
         }
     }
 

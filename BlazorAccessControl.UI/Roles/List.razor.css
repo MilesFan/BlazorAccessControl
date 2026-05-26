@@ -1,0 +1,24 @@
+﻿* {
+    --border: 1px solid rgb(222, 226, 230);
+    --padding: 0.2rem 0.4rem;
+    --border-radius: 6px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    text-align: center;
+}
+
+th, td {
+    border: var(--border);
+    padding: var(--padding);
+}
+
+button {
+    border: var(--border);
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+}
