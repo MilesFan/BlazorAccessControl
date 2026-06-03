@@ -1,8 +1,11 @@
 using BlazorAccessControl.Interface;
 using Example.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Example
 {
@@ -15,8 +18,8 @@ namespace Example
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
             builder.Services
+                .AddCascadingAuthenticationState()
                 .AddAuthentication(options =>
                 {
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -25,10 +28,17 @@ namespace Example
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
                     options =>
                     {
-                        options.LoginPath = "/Account/Login";
-                        options.LogoutPath = "/Account/Logout";
+                        options.LoginPath = "/account/signin";
+                        options.LogoutPath = "/account/signout";
+                        options.ForwardSignIn = "/account/signin";
                     })
-                .AddIdentityCookies();
+                .AddIdentityCookies(option => {
+                    option.ApplicationCookie?.Configure(s => {
+                        s.LoginPath = "/account/signin";
+                        s.LogoutPath = "/account/signout";
+                        s.AccessDeniedPath ="/access-denied";
+                    });
+                });
 
             builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<ApplicationRole>()
@@ -39,8 +49,15 @@ namespace Example
             builder.Services.AddScoped<IUserService, DummyUserService>();
             //builder.Services.AddDbContext<DBContext>();
             builder.Services.AddDbContextFactory<DBContext>(
-                options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-            
+                options =>
+                {
+                    options.EnableSensitiveDataLogging(builder.Configuration.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
+                    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+                });
+            builder.Services.AddHttpContextAccessor();
+            //builder.Services.AddScoped<HttpContextAccessor>();
+            //    .AddScoped<Microsoft.AspNetCore.Http.IHttpContextAccessor>(sp => sp.GetRequiredService<HttpContextAccessor>());
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -59,7 +76,17 @@ namespace Example
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+            var a= new ApplicationUserClaim();
 
+            DummyUserService.MapLoginUrl(app);
+            app.SetRequestLocalization();
+            app.MapGet("/setlanguage", LanguageHelper.SetLanguage);
+            //using (var serviceScope = app.Services.CreateScope())
+            //{
+            //    var services = serviceScope.ServiceProvider;
+            //    var userService = services.GetRequiredService<IUserService>();
+            //    app.MapGet("/login_password", userService.PasswordSignIn );
+            //}
             app.Run();
         }
     }

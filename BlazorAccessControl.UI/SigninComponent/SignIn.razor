@@ -1,0 +1,197 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Configuration
+@using System.Web
+@using System.Threading.Tasks
+@inject IJSRuntime js
+@inject NavigationManager nav
+@inject IHttpContextAccessor httpContextAccessor
+@inject IConfiguration _config
+@inject IUserService userService
+<div>
+    @if (signinMethod != SignInMethod.UserNamePassword)
+    {
+        <div style="display: flex; gap: 20px;">
+            <div style="align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                <form action="@userService.GetOAuthAuthenticationEndPoint()" method="post" style="align-self: stretch;">
+                    <input type="hidden" id="_return_url_winauth" name="uri" required value="@(OAuthReturnURL)" />
+
+                    <button type="submit" style="border: none; outline: none; background-color:transparent; height: 100%;">使用Windows账号登录</button>
+                </form>
+            </div>
+            <div style="align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                <button @onclick="() => signinMethod = SignInMethod.UserNamePassword" style="background-color:transparent; border: none; outline: none; align-self: stretch; border-radius: 4px;">使用账号密码登录</button>
+            </div>
+            
+        </div>
+    }
+    @if (signinMethod == SignInMethod.UserNamePassword)
+    {
+
+        <form method="post" action="@userService.GetPasswordLoginEndPoint()">
+            <input type="hidden" name="__RequestVerificationToken" value="@antiforgeryToken" />
+            <input type="hidden" name="ReturnUrl" value="/" />
+            <div style="display:flex; flex-direction:column; max-width: 300px; gap:20px;">
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; flex-direction:column; flex-wrap:nowrap; --padding: 4px; ">
+                        <span style="display:flex; align-items:center;line-height: 1.2; white-space:nowrap; border: 1px solid gray; border-bottom: none; border-top-left-radius: 4px; border-top-right-radius: 4px; box-sizing:border-box; padding: var(--padding); width:fit-content; background-color: #f0f0f0;  ">
+                            @Resource.UserName
+                        </span>
+                        <div style="border: 1px solid gray; outline:none; border-radius: 4px; border-top-left-radius: 0px; box-sizing:border-box; font-family:inherit; font-size:inherit; min-width:100%; overflow:hidden; padding: 0px;">
+                            <input @bind="UserName" name="UserName" type="text" autocomplete="off" autocorrect="off" style="border: none; outline: none;width: 100%;height: 100%;background-color: transparent;color: inherit; padding: var(--padding);" />
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; flex-direction:column; flex-wrap:nowrap; --padding: 4px; ">
+                        <span style="display:flex; align-items:center;line-height: 1.2; white-space:nowrap; border: 1px solid gray; border-bottom: none; border-top-left-radius: 4px; border-top-right-radius: 4px; box-sizing:border-box; padding: var(--padding); width:fit-content; background-color: #f0f0f0;  ">
+                            @Resource.Password
+                        </span>
+                        <div style="border: 1px solid gray; outline:none; border-radius: 4px; border-top-left-radius: 0px; box-sizing:border-box; font-family:inherit; font-size:inherit; min-width:100%; overflow:hidden; padding: 0px; display:flex; flex-wrap:nowrap;">
+                            <input @bind="Password" name="Password" type="@(RevealPassword ? "text" : "password")" autocomplete="off" autocorrect="off" style="padding: var(--padding); border: none;border-right: 1px solid gray;  outline: none;width: 100%;height: 100%;background-color: transparent;color: inherit;" />
+                            <div style="box-sizing:border-box; cursor: pointer; height: 24px; width: 24px; overflow:hidden; display: flex; align-items:center; justify-content:center;" @onclick="toggleReviewPasswrod">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="@(RevealPassword ? "#000000" : "#909090")" d="M12 10.062c1.062 0 1.937.875 1.937 1.938A1.947 1.947 0 0 1 12 13.937 1.947 1.947 0 0 1 10.062 12c0-1.063.875-1.938 1.938-1.938m0-2.125A4.054 4.054 0 0 0 7.938 12 4.054 4.054 0 0 0 12 16.062 4.054 4.054 0 0 0 16.063 12 4.054 4.054 0 0 0 12 7.937m0-1.375C17.5 6.562 22 12 22 12s-4.5 5.438-10 5.438S2 12 2 12s4.5-5.438 10-5.438" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if (loginResult?.Succeeded == false)
+                {
+                    <div style="background-color:#ff000090; color: white; border-radius: 6px; padding: 8px; width: 100%;">
+                        @loginResult.Message
+                    </div>
+                }
+                <div style="flex: 0 1;">
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" @onclick="() => {signinMethod = null; Password = string.Empty;}" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                            @Resource.Back
+                        </button>
+                        <div style="flex-grow: 1"></div>
+                        <button type="button" @onclick="Submit" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                            @Resource.Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+@code {
+    private enum SignInMethod
+    {
+        UserNamePassword,
+        OAuth,
+        AzureAD
+    }
+    private SignInMethod? signinMethod;
+    public class LoginResult
+    {
+        public bool Succeeded { get; set; }
+        public string? Message { get; set; }
+    }
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    [Parameter]
+    public EventCallback OnAuthenticationStateChange { get; set; }
+
+    private string UserName = string.Empty;
+
+    private string Password = string.Empty;
+    private bool RevealPassword;
+    public string? ReturnUrlEncoded
+    {
+        get
+        {
+            if (ReturnUrl is null) return null;
+            return Uri.EscapeDataString(ReturnUrl);
+        }
+    }
+    private LoginResult? loginResult;
+    private string antiforgeryToken = string.Empty;
+    private static string postScript = @"
+(()=>{
+
+let funcObj = {
+    postData: async function(url, data)
+    {
+        try {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    formData.append(key, value);
+                }
+            });
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+            const jsonResponse = await response.json();
+            return jsonResponse;
+        } catch (error) {
+            return {Succeeded: false, Message: `Error: ${error.message}`}
+            console.error('Error:', error);
+        }
+    }
+};
+return funcObj;
+})()";
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(UserName))
+        {
+            loginResult = new LoginResult { Succeeded = false, Message = Resource.SigninUserNameRequired };
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(Password))
+        {
+            loginResult = new LoginResult { Succeeded = false, Message = Resource.SigninPasswordRequired };
+            return;
+        }
+        try
+        {
+            var data = new
+            {
+                UserName = UserName,
+                Password = Password,
+                __RequestVerificationToken = userService.GetAntiForgeryToken()
+            };
+            Password = string.Empty;
+            var scriptObj = await js.InvokeAsync<IJSObjectReference>("eval", postScript);
+            loginResult = await scriptObj.InvokeAsync<LoginResult>("postData", userService.GetPasswordLoginEndPoint(), data);
+            if (loginResult.Succeeded)
+            {
+                if (OnAuthenticationStateChange.HasDelegate)
+                    await OnAuthenticationStateChange.InvokeAsync();
+                if (ReturnUrl is not null)
+                    nav.NavigateTo(ReturnUrl, true);
+                else if (OnAuthenticationStateChange.HasDelegate == false)
+                    nav.NavigateTo("/", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            loginResult = new LoginResult { Succeeded = false, Message = $"failed to sign in: {ex.Message}" };
+        }
+    }
+    private void Retry(MouseEventArgs args)
+    {
+        loginResult = null;
+    }
+
+    private string OAuthReturnURL = default!;
+    private string? URLWindowsAuthentication;
+    protected override void OnInitialized()
+    {
+        antiforgeryToken = userService.GetAntiForgeryToken();
+        OAuthReturnURL = nav.BaseUri.TrimEnd('/') + userService.GetOAuthValidationEndPoint() + "?returnurl=" + System.Web.HttpUtility.UrlEncode(ReturnUrl);
+        URLWindowsAuthentication = _config.GetValue<string>("Authentication:Windows");
+    }
+    private void toggleReviewPasswrod()
+    {
+        RevealPassword = !RevealPassword;
+    }
+}

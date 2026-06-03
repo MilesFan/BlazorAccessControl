@@ -26,6 +26,7 @@ button {
     border: var(--border);
     padding: var(--padding);
     border-radius: var(--border-radius);
+    white-space:nowrap;
 }
 .container {
     border-bottom: var(--border);
@@ -88,4 +89,15 @@ button {
     flex-flow: row-reverse;
     align-self: center;
     white-space: nowrap;
+    background-color: #00000020;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor:pointer;
+}
+    .role-item input:checked {
+        accent-color: white;
+    }
+.role-item:has(input:checked) {
+    background-color: dodgerblue;
+    color:white;
 }

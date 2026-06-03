@@ -178,7 +178,7 @@ else if (Role is not null)
         }
         catch (Exception ex)
         {
-            await js.InvokeVoidAsync("alert", $"保存失败: {ex.Message}");
+            await js.InvokeVoidAsync("alert", $"failed to save: {ex.Message}");
             return;
         }
         if (OnChange.HasDelegate) await OnChange.InvokeAsync(true);
@@ -197,7 +197,7 @@ else if (Role is not null)
         }
         catch (Exception ex)
         {
-            await js.InvokeVoidAsync("alert", $"删除失败: {ex.Message}");
+            await js.InvokeVoidAsync("alert", $"failed to delete: {ex.Message}");
             return;
         }
         if (OnChange.HasDelegate) await OnChange.InvokeAsync(true);

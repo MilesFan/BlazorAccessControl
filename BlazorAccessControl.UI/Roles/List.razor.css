@@ -21,4 +21,5 @@ button {
     border: var(--border);
     padding: var(--padding);
     border-radius: var(--border-radius);
+    white-space: nowrap;
 }

@@ -1,0 +1,17 @@
+﻿@page "/account/signin"
+@inject IUserService userService
+@inject NavigationManager nav
+<div style="margin: 0 auto; max-width: 800px;">
+
+    <h3>Sign In</h3>
+    <hr />
+    <BlazorAccessControl.UI.SigninComponent.SignIn />
+</div>
+@code{
+    protected override void OnInitialized()
+    {
+        if (userService.CurrentUser is not null)
+            nav.NavigateTo("/");
+        base.OnInitialized();
+    }
+}

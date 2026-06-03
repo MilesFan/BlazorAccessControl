@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject IUserService userService
+@inject NavigationManager nav
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Example</a>
     </div>
@@ -8,6 +10,11 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @userService.CurrentUser?.DisplayName
+            </NavLink>
+        </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -25,6 +32,50 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Users
             </NavLink>
         </div>
+        @foreach(var a in LanguageHelper.SupportedCultures)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="()=>setLanguage(a.IetfLanguageTag)" href="javascript:void(0);">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @a.EnglishName
+                </NavLink>
+            </div>
+        }
+        @if (userService.CurrentUser is null)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="account/signin">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @BlazorAccessControl.UI.Resources.Resource.SignIn
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <form method="post" action="@userService.GetSignOutEndPoint()">
+                    <input type="hidden" name="__RequestVerificationToken" value="@userService.GetAntiForgeryToken()" />
+                    <button type="submit" class="nav-link">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        }
     </nav>
 </div>
 
+
+@code
+{
+    private void setEN()
+    {
+        nav.NavigateTo($"setlanguage?redirectUri={System.Web.HttpUtility.UrlEncode(nav.Uri)}&languagecode=en", true);
+    }
+    private void setCN()
+    {
+        nav.NavigateTo($"setlanguage?redirectUri={System.Web.HttpUtility.UrlEncode(nav.Uri)}&languagecode=zh_Hans", true);
+    }
+    private void setLanguage(string IetfLanguageTag)
+    {
+        nav.NavigateTo($"setlanguage?redirectUri={System.Web.HttpUtility.UrlEncode(nav.Uri)}&languagecode={IetfLanguageTag}", true);
+    }
+}

@@ -2,7 +2,7 @@
 @inject IUserService userService
 @inject IJSRuntime js
 <div style="display:flex; gap: 10px; margin-bottom: 1rem;">
-    <button @onclick="@(() => Edit("new"))">新建</button>
+    <button @onclick="@(() => Edit("new"))">@Resource.Create</button>
 </div>
 <div style="display:flex; flex-direction:row; column-gap: 20px;align-items: start;">
     <table>
@@ -14,10 +14,10 @@
         </colgroup>
         <thead>
             <tr>
-                <th>姓名</th>
-                <th>账号</th>
-                <th>Email</th>
-                <th>角色</th>
+                <th>@Resource.UserDisplayName</th>
+                <th>@Resource.UserName</th>
+                <th>@Resource.UserEmail</th>
+                <th>@Resource.UserRoles</th>
                 <th></th>
             </tr>
         </thead>
@@ -29,7 +29,7 @@
                     <td>@item.UserName</td>
                     <td>@item.Email</td>
                     <td>@string.Join(',', item.GetRoles().Select(r=>r.Name))</td>
-                    <td><button @onclick="() => Edit(item.Id)">修改</button></td>
+                    <td><button @onclick="() => Edit(item.Id)">@Resource.Edit</button></td>
                 </tr>
             }
         </tbody>
@@ -79,7 +79,7 @@
         catch (Exception ex)
         {
             users = Array.Empty<IUser>();
-            Console.Error.WriteLine($"加载用户失败: {ex}");
+            Console.Error.WriteLine($"failed to load users: {ex}");
             //await js.InvokeVoidAsync("alert", $"加载用户失败: {ex.Message}");
         }
     }
