@@ -11,3 +11,6 @@
 /Example/obj
 /BlazorAccessControl.EFCore/obj
 /BlazorAccessControl.EFCore/bin/Release
+/ExampleNet8/bin
+/ExampleNet8/obj
+/ExampleNet8/Properties
