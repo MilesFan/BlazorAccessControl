@@ -1,6 +1,6 @@
 ﻿using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
-using Example.Components.Pages;
+using ExampleNet10.Components.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
