@@ -192,4 +192,7 @@
   <data name="Back" xml:space="preserve">
     <value>后退</value>
   </data>
+  <data name="RoleId" xml:space="preserve">
+    <value>编号</value>
+  </data>
 </root>

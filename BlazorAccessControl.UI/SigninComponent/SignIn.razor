@@ -6,7 +6,6 @@
 @inject IJSRuntime js
 @inject NavigationManager nav
 @inject IHttpContextAccessor httpContextAccessor
-@inject IConfiguration _config
 @inject IUserService userService
 <div>
     @if (signinMethod != SignInMethod.UserNamePassword)
@@ -183,12 +182,10 @@ return funcObj;
     }
 
     private string OAuthReturnURL = default!;
-    private string? URLWindowsAuthentication;
     protected override void OnInitialized()
     {
         antiforgeryToken = userService.GetAntiForgeryToken();
         OAuthReturnURL = nav.BaseUri.TrimEnd('/') + userService.GetOAuthValidationEndPoint() + "?returnurl=" + System.Web.HttpUtility.UrlEncode(ReturnUrl);
-        URLWindowsAuthentication = _config.GetValue<string>("Authentication:Windows");
     }
     private void toggleReviewPasswrod()
     {

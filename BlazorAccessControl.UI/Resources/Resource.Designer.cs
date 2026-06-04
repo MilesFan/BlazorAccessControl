@@ -160,6 +160,15 @@ namespace BlazorAccessControl.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Id.
+        /// </summary>
+        public static string RoleId {
+            get {
+                return ResourceManager.GetString("RoleId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Role Management.
         /// </summary>
         public static string RoleManagement {

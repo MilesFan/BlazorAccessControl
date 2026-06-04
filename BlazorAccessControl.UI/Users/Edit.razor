@@ -219,6 +219,7 @@ else if (User is not null)
         RoleInfos = allRoles.Select(role => new RoleInfo { Role = role, Checked = UserRoles.Any(ur => role.Name == ur.Name) }).ToArray();
         DisplayNames = User.GetClaims()
                            .Where(i=> i.ClaimType?.StartsWith("DisplayName-") == true)
+                           .DistinctBy(i => i.ClaimType)
                            .ToDictionary(c => c.ClaimType!, c => c.ClaimValue);
         isLoading = false;
         await InvokeAsync(StateHasChanged);
