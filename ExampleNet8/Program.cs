@@ -41,11 +41,11 @@ namespace ExampleNet8
                 });
 
 
-            builder.Services.AddDbContextFactory<DBContext>(lifetime: ServiceLifetime.Scoped);
+            builder.Services.AddDbContextFactory<MyDBContext>(lifetime: ServiceLifetime.Transient);
 
             builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<DBContext>()
+                .AddEntityFrameworkStores<MyDBContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddHttpContextAccessor();
@@ -68,6 +68,10 @@ namespace ExampleNet8
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+            
+            DummyUserService.MapLoginUrl(app);
+            app.SetRequestLocalization();
+            app.MapGet("/setlanguage", LanguageHelper.SetLanguage);
 
             app.Run();
         }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace ExampleNet8
 {
-    public class DBContext : BlazorAccessControl.EFCore.DBContext
+    public class MyDBContext : BlazorAccessControl.EFCore.DBContext
     {
         private readonly IConfiguration config;
 
@@ -17,7 +17,7 @@ namespace ExampleNet8
             base.OnConfiguring(optionsBuilder);
         }
 
-        public DBContext(DbContextOptions<DBContext> options, IConfiguration config)
+        public MyDBContext(DbContextOptions<MyDBContext> options, IConfiguration config)
         {
             this.config = config;
         }

@@ -86,14 +86,14 @@ namespace ExampleNet10
         }
         private IUser? _currentUser;
         //private DBContext context;
-        private readonly IDbContextFactory<DBContext> contextFactory;
+        private readonly IDbContextFactory<MyDBContext> contextFactory;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signinManager;
         private readonly IAntiforgery antiforgery;
         private readonly IHttpContextAccessor? httpContextAccessor;
         private readonly IConfiguration config;
         public DummyUserService(
-            IDbContextFactory<DBContext> _contextFactory,
+            IDbContextFactory<MyDBContext> _contextFactory,
             UserManager<ApplicationUser> _userManager,
             SignInManager<ApplicationUser> _signinManager,
             IAntiforgery _antiforgery,

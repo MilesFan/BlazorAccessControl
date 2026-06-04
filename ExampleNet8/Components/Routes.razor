@@ -1,6 +1,37 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager nav 
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated == true)
+                    {
+                        <div style="background-color:#ff000090; color: white; border-radius: 6px; padding: 8px; width: fit-content;">You have insufficient permission to view this content.</div>
+                    }
+                    else
+                    {
+                        <div style="background-color:#ff000090; color: white; border-radius: 6px; padding: 8px; width: fit-content; margin-bottom: 20px;">You are not signed in yet.</div>
+                        <BlazorAccessControl.UI.SigninComponent.SignIn OnAuthenticationStateChange="OnAuthenticationStateChange" />
+                    }
+                </NotAuthorized>
+                <Authorizing>
+                    <h1>Authorization in progress</h1>
+                    <p>Only visible while authorization is in progress.</p>
+                </Authorizing>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(Layout.MainLayout)">
+                <p role="alert">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+@code{
+    private async Task OnAuthenticationStateChange()
+    {
+        nav.Refresh(true);
+    }
+}

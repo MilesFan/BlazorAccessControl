@@ -41,15 +41,10 @@ namespace ExampleNet10
                     });
                 });
 
-            builder.Services.AddDbContextFactory<DBContext>(
-                options =>
-                {
-                    options.EnableSensitiveDataLogging(builder.Configuration.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
-                    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-                });
+            builder.Services.AddDbContextFactory<MyDBContext>();
             builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<DBContext>()
+                .AddEntityFrameworkStores<MyDBContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddHttpContextAccessor();

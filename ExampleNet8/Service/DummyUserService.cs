@@ -1,5 +1,6 @@
 ﻿using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
+using ExampleNet8;
 using ExampleNet8.Components.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
@@ -10,7 +11,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Web;
-
 public class DummyUserService : IUserService
 {
     public string? GetPasswordLoginEndPoint() => config.GetValue<string?>("Authentication:EndPoint_Password");
@@ -81,15 +81,15 @@ public class DummyUserService : IUserService
         }
     }
     private IUser? _currentUser;
-    //private DBContext context;
-    private readonly IDbContextFactory<DBContext> contextFactory;
+    //private MyDBContext context;
+    private readonly IDbContextFactory<MyDBContext> contextFactory;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signinManager;
     private readonly IAntiforgery antiforgery;
     private readonly IHttpContextAccessor? httpContextAccessor;
     private readonly IConfiguration config;
     public DummyUserService(
-        IDbContextFactory<DBContext> _contextFactory,
+        IDbContextFactory<MyDBContext> _contextFactory,
         UserManager<ApplicationUser> _userManager,
         SignInManager<ApplicationUser> _signinManager,
         IAntiforgery _antiforgery,
