@@ -1,6 +1,6 @@
 using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
-using Example.Components;
+using ExampleNet10.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -41,14 +41,6 @@ namespace ExampleNet10
                     });
                 });
 
-
-            //builder.Services.AddDbContext<DBContext>();
-            builder.Services.AddDbContextFactory<DBContext>(
-                options =>
-                {
-                    options.EnableSensitiveDataLogging(builder.Configuration.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
-                    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-                });
             builder.Services.AddDbContextFactory<DBContext>(
                 options =>
                 {
