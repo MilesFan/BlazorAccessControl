@@ -1,0 +1,6 @@
+﻿@page "/roles"
+@attribute [Authorize]
+@using BlazorAccessControl.UI.Roles
+@using BlazorAccessControl.EFCore
+<h3>Roles</h3>
+<List TRole="ApplicationRole" />
