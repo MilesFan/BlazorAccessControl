@@ -3,4 +3,5 @@
   <Project Path="BlazorAccessControl.Interface/BlazorAccessControl.Interface.csproj" />
   <Project Path="BlazorAccessControl.UI/BlazorAccessControl.UI.csproj" Id="10aa5dc1-fd6c-4ce7-a855-f907950af3d6" />
   <Project Path="Example/ExampleNet10.csproj" Id="99d0abac-2cb4-4cf4-804b-73b42a0335c4" />
+  <Project Path="ExampleNet8/ExampleNet8.csproj" Id="2bc23b06-1df8-4207-a683-dadb5de730e5" />
 </Solution>
