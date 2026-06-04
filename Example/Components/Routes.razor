@@ -30,13 +30,8 @@
 </CascadingAuthenticationState>
 <BlazorLoadingIndicator.LoadingIndicator />
 @code{
-    private BlazorLoadingIndicator.LoadingIndicator loadingIndicator = default!;
     private async Task OnAuthenticationStateChange()
     {
         nav.Refresh(true);
-    }
-    private async Task ToggleLoadingIndicator(bool show)
-    {
-        loadingIndicator.ToggleIndicator(show);
     }
 }
