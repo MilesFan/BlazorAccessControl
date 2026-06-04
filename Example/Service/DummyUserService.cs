@@ -1,4 +1,5 @@
-﻿using BlazorAccessControl.Interface;
+﻿using BlazorAccessControl.EFCore;
+using BlazorAccessControl.Interface;
 using Example.Components.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components;
@@ -12,8 +13,8 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Example
-{    
+namespace ExampleNet10
+{
     public class DummyUserService : IUserService
     {
         public string? GetPasswordLoginEndPoint() => config.GetValue<string?>("Authentication:EndPoint_Password");
@@ -29,29 +30,31 @@ namespace Example
             var endpoint_password = userService.GetPasswordLoginEndPoint();
             if (!string.IsNullOrEmpty(endpoint_password))
             {
-                app.MapPost(endpoint_password, async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService userService)=>{
+                app.MapPost(endpoint_password, async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService userService) =>
+                {
                     try
                     {
                         await userService.PasswordSignIn(UserName, Password);
-                        return Results.Ok(new {Succeeded = true });
+                        return Results.Ok(new { Succeeded = true });
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        return Results.BadRequest(new {Succeeded = false, Message = "Login Failed: " + ex.Message });
+                        return Results.BadRequest(new { Succeeded = false, Message = "Login Failed: " + ex.Message });
                     }
                 });
             }
             var endpoint_signout = userService.GetSignOutEndPoint();
             if (!string.IsNullOrEmpty(endpoint_signout))
             {
-                app.MapPost(endpoint_signout, async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService userService)=>{
+                app.MapPost(endpoint_signout, async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService userService) =>
+                {
                     var _ReturnUrl = ReturnUrl ?? context.Request.Headers.Referer.ToString();
-                    if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl ="/";
+                    if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
                     try
                     {
                         await userService.SignOutAsync();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
                     }
@@ -61,9 +64,10 @@ namespace Example
             var endpoint_oauthvalidation = userService.GetOAuthValidationEndPoint();
             if (!string.IsNullOrEmpty(endpoint_oauthvalidation))
             {
-                app.MapPost(endpoint_oauthvalidation, async (IUserService _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService userService)=>{
+                app.MapPost(endpoint_oauthvalidation, async (IUserService _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService userService) =>
+                {
                     var _ReturnUrl = ReturnUrl;
-                    if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl ="/";
+                    if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
                     if (string.IsNullOrWhiteSpace(__jwt_token))
                     {
                         return Results.BadRequest("JWT Token Missing");
@@ -109,9 +113,9 @@ namespace Example
             {
                 if (_currentUser is not null) return _currentUser;
                 if (!signinManager.IsSignedIn(signinManager.Context.User)) return null;
-                using var context =  contextFactory.CreateDbContext();
+                using var context = contextFactory.CreateDbContext();
                 var userId = userManager.GetUserId(signinManager.Context.User);
-                _currentUser = context.Users.Include(i=>i.Claims).FirstOrDefault(i=>i.Id == userId);
+                _currentUser = context.Users.Include(i => i.Claims).FirstOrDefault(i => i.Id == userId);
                 return _currentUser;
             }
         }
@@ -123,17 +127,17 @@ namespace Example
             _user.NormalizedUserName = _user.UserName?.ToUpper();
             _user.NormalizedEmail = _user.Email?.ToUpper();
             using var context = await contextFactory.CreateDbContextAsync();
-            if (_user.UserRoles.Count()>0)
+            if (_user.UserRoles.Count() > 0)
             {
-                foreach(var userRole in _user.UserRoles)
+                foreach (var userRole in _user.UserRoles)
                 {
                     context.Attach(userRole).State = EntityState.Unchanged;
                 }
                 context.UserRoles.AddRange(_user.UserRoles);
             }
-            if (_user.Claims.Count()>0)
+            if (_user.Claims.Count() > 0)
             {
-                foreach(var userClaim in _user.Claims)
+                foreach (var userClaim in _user.Claims)
                 {
                     context.Attach(userClaim).State = EntityState.Unchanged;
                 }
@@ -160,9 +164,9 @@ namespace Example
         {
             using var context = await contextFactory.CreateDbContextAsync();
             var users = await context.Users.AsNoTracking()
-                                           .Include(i=>i.UserRoles)
-                                           .ThenInclude(i=>i.Role)
-                                           .Include(i=>i.Claims)
+                                           .Include(i => i.UserRoles)
+                                           .ThenInclude(i => i.Role)
+                                           .Include(i => i.Claims)
                                            .ToArrayAsync();
             return users;
         }
@@ -175,26 +179,26 @@ namespace Example
         public async Task<IRole?> GetRoleByIdAsync(string id)
         {
             using var context = await contextFactory.CreateDbContextAsync();
-            return await context.Roles.AsNoTracking().FirstOrDefaultAsync(i=>i.Id == id);
+            return await context.Roles.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
         }
 
         public async Task<IUser?> GetUserByIdAsync(string id)
         {
             using var context = await contextFactory.CreateDbContextAsync();
             return await context.Users.AsNoTracking()
-                                      .Include(i=>i.UserRoles)
-                                      .ThenInclude(i=>i.Role)
-                                      .Include(i=>i.Claims)
-                                      .FirstOrDefaultAsync(i=>i.Id == id);
+                                      .Include(i => i.UserRoles)
+                                      .ThenInclude(i => i.Role)
+                                      .Include(i => i.Claims)
+                                      .FirstOrDefaultAsync(i => i.Id == id);
         }
         public async Task<IUser?> GetUserByNameAsync(string UserName)
         {
             using var context = await contextFactory.CreateDbContextAsync();
             return await context.Users.AsNoTracking()
-                                      .Include(i=>i.UserRoles)
-                                      .ThenInclude(i=>i.Role)
-                                      .Include(i=>i.Claims)
-                                      .FirstOrDefaultAsync(i=>i.UserName == UserName);
+                                      .Include(i => i.UserRoles)
+                                      .ThenInclude(i => i.Role)
+                                      .Include(i => i.Claims)
+                                      .FirstOrDefaultAsync(i => i.UserName == UserName);
         }
 
         public Task SetPasswordAsync(string id, string Password)
@@ -208,9 +212,9 @@ namespace Example
             var _user = user as ApplicationUser;
             if (_user == null) throw new Exception("User not found");
             await signinManager.SignInAsync(_user, true);
-             _currentUser = user;
+            _currentUser = user;
         }
-        
+
         public async Task SignInAsync(string UserName, string Password)
         {
             try
@@ -294,6 +298,64 @@ namespace Example
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                var userInDB = await context.Users.AsTracking()
+                                                  .Include(i => i.UserRoles)
+                                                  .Include(i => i.Claims)
+                                                  .FirstOrDefaultAsync(i => i.Id == user.Id);
+
+                if (userInDB == null)
+                    throw new Exception("User not found");
+
+                userInDB.UserName = user.UserName;
+                userInDB.NormalizedUserName = user.UserName?.ToUpper();
+                userInDB.Email = user.Email;
+                userInDB.NormalizedEmail = user.Email?.ToUpper();
+
+                var newUserRoles = user.GetRoles().ToArray();
+                var rolesInDB = userInDB.UserRoles.ToArray();
+
+                userInDB.UserRoles.RemoveAll(i => newUserRoles.Any(r => r.Id == i.RoleId) == false);
+
+                userInDB.UserRoles.AddRange(newUserRoles.Where(i => rolesInDB.Any(r => r.RoleId == i.Id) == false)
+                                                        .Select(i => new ApplicationUserRole
+                                                        {
+                                                            RoleId = i.Id,
+                                                            UserId = user.Id
+                                                        }
+                                                                )
+                                            );
+
+                var newUserClaims = user.GetClaims().ToArray();
+                var claimsInDB = userInDB.Claims.ToArray();
+                var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+                userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+                var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
+                                               .Select(i => new ApplicationUserClaim
+                                               {
+                                                   UserId = user.Id,
+                                                   ClaimType = i.ClaimType,
+                                                   ClaimValue = i.ClaimValue
+                                               }
+                                                       );
+                userInDB.Claims.AddRange(claimsToAdd);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
+        }
+
+        public async Task UpdateUserAsync_old(IUser user)
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
                 var _user = user as ApplicationUser;
                 if (_user == null) throw new ArgumentException("Invalid user type");
                 await context.Users.AsNoTracking().Where(u => u.Id == user.Id).ExecuteUpdateAsync(setters =>
@@ -306,22 +368,22 @@ namespace Example
                 );
 
                 var currentUserRoles = _user.UserRoles.ToArray();// user.GetRoles();
-                var existingsUserRoles = await context.UserRoles.AsNoTracking().Where(i=>i.UserId == user.Id).ToListAsync();
+                var existingsUserRoles = await context.UserRoles.AsNoTracking().Where(i => i.UserId == user.Id).ToListAsync();
 
-                var rolesToAdd = currentUserRoles.Where(i=>existingsUserRoles.Any(r=>r.RoleId == i.RoleId) == false)
-                                                 .Select(i=> new ApplicationUserRole { RoleId = i.RoleId, UserId = user.Id });
+                var rolesToAdd = currentUserRoles.Where(i => existingsUserRoles.Any(r => r.RoleId == i.RoleId) == false)
+                                                 .Select(i => new ApplicationUserRole { RoleId = i.RoleId, UserId = user.Id });
                 if (rolesToAdd.Count() > 0)
                 {
-                    foreach(var role in rolesToAdd)
+                    foreach (var role in rolesToAdd)
                     {
                         context.Attach(role).State = EntityState.Added;
                     }
                 }
-                
-                var rolesToRemove = existingsUserRoles.Where(i=>currentUserRoles.Any(r=>r.RoleId == i.RoleId) == false);
+
+                var rolesToRemove = existingsUserRoles.Where(i => currentUserRoles.Any(r => r.RoleId == i.RoleId) == false);
                 if (rolesToRemove.Count() > 0)
                 {
-                    foreach(var role in rolesToRemove)
+                    foreach (var role in rolesToRemove)
                     {
                         context.Attach(role).State = EntityState.Deleted;
                     }
@@ -345,7 +407,7 @@ namespace Example
                 var claimsToRemove = existingsUserClaims.Where(i => currentUserClaims.Any(r => r.Id == i.Id) == false);
                 if (claimsToRemove.Count() > 0)
                 {
-                    foreach(var claim in claimsToRemove)
+                    foreach (var claim in claimsToRemove)
                     {
                         context.Attach(claim).State = EntityState.Deleted;
                     }
@@ -361,14 +423,13 @@ namespace Example
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 Console.WriteLine(ex.ToString());
                 throw;
             }
         }
-
         public async Task CreateRoleAsync(IRole role)
         {
             var _role = role as ApplicationRole;
@@ -409,7 +470,7 @@ namespace Example
             var result = await userManager.ResetPasswordAsync(_user, resetToken, newPassword);
             if (!result.Succeeded)
             {
-                throw new Exception(string.Join(Environment.NewLine, result.Errors.Select(i=>i.Description)));
+                throw new Exception(string.Join(Environment.NewLine, result.Errors.Select(i => i.Description)));
             }
         }
 

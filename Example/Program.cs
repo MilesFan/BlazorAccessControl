@@ -1,3 +1,4 @@
+using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
 using Example.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Example
+namespace ExampleNet10
 {
     public class Program
     {
@@ -40,13 +41,7 @@ namespace Example
                     });
                 });
 
-            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<DBContext>()
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
 
-            builder.Services.AddScoped<IUserService, DummyUserService>();
             //builder.Services.AddDbContext<DBContext>();
             builder.Services.AddDbContextFactory<DBContext>(
                 options =>
@@ -54,7 +49,19 @@ namespace Example
                     options.EnableSensitiveDataLogging(builder.Configuration.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
                     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
                 });
+            builder.Services.AddDbContextFactory<DBContext>(
+                options =>
+                {
+                    options.EnableSensitiveDataLogging(builder.Configuration.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
+                    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+                });
+            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<ApplicationRole>()
+                .AddEntityFrameworkStores<DBContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IUserService, DummyUserService>();
             //builder.Services.AddScoped<HttpContextAccessor>();
             //    .AddScoped<Microsoft.AspNetCore.Http.IHttpContextAccessor>(sp => sp.GetRequiredService<HttpContextAccessor>());
 
@@ -76,7 +83,6 @@ namespace Example
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-            var a= new ApplicationUserClaim();
 
             DummyUserService.MapLoginUrl(app);
             app.SetRequestLocalization();

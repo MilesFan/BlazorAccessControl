@@ -1,79 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlazorAccessControl.EFCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
-namespace Example
+namespace ExampleNet10
 {
-    public class DBContext: IdentityDbContext<ApplicationUser, ApplicationRole, string,
-        ApplicationUserClaim, ApplicationUserRole, ApplicationUserLogin,
-        ApplicationRoleClaim, ApplicationUserToken>
+    public class DBContext : BlazorAccessControl.EFCore.DBContext
     {
-
-        
-        public DBContext(DbContextOptions<DBContext> options)
-            : base(options)
-        {
-        }
-        //private IConfiguration _config;
-        //public DBContext(IConfiguration configuration, DbContextOptions<DBContext> options)
-        //        : base(options)
-        //{
-        //    _config = configuration;
-        //}
+        private readonly IConfiguration config;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            optionsBuilder.EnableSensitiveDataLogging(config.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
+            optionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            base.OnConfiguring(optionsBuilder);
+        }
+
+        public DBContext(DbContextOptions<DBContext> options, IConfiguration config)
+        {
+            this.config = config;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<ApplicationUser>(b =>
-            {
-                // Each User can have many UserClaims
-                b.HasMany(e => e.Claims)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(uc => uc.UserId)
-                    .IsRequired();
-
-                // Each User can have many UserLogins
-                b.HasMany(e => e.Logins)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ul => ul.UserId)
-                    .IsRequired();
-
-                // Each User can have many UserTokens
-                b.HasMany(e => e.Tokens)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ut => ut.UserId)
-                    .IsRequired();
-
-                // Each User can have many entries in the UserRole join table
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired();
-            });
-            
-            modelBuilder.Entity<ApplicationUserClaim>(b => b.HasKey(uc => uc.Id));
-            modelBuilder.Entity<ApplicationRoleClaim>(b => b.HasKey(rc => rc.Id));
-
-            modelBuilder.Entity<ApplicationRole>(b =>
-            {
-                // Each Role can have many entries in the UserRole join table
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .IsRequired();
-
-                // Each Role can have many associated RoleClaims
-                b.HasMany(e => e.RoleClaims)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(rc => rc.RoleId)
-                    .IsRequired();
-            });
 
             modelBuilder.Entity<ApplicationUser>().HasData(
             new List<ApplicationUser>
