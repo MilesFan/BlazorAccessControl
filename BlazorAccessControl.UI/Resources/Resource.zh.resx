@@ -195,4 +195,7 @@
   <data name="RoleId" xml:space="preserve">
     <value>编号</value>
   </data>
+  <data name="SignOut" xml:space="preserve">
+    <value>退出登录</value>
+  </data>
 </root>

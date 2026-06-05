@@ -1,0 +1,89 @@
+﻿@using System.Globalization
+@using System.Threading.Tasks
+@inject IJSRuntime js
+@inject NavigationManager nav
+@inject IUserService userService
+@if (userService.CurrentUser is null)
+{
+    <dialog @ref="dialogRef"
+            style="line-height:normal; cursor:auto;min-width: 300px; max-width: 600px; min-height: 300px; font-size: 14px; padding: 0px; max-height: calc(100vh - 20px); border: 1px solid gray; border-radius: 8px; box-shadow: 0px 0px 14px -5px rgba(66, 68, 90, 1); width: fit-content; top: 50vh; left: 50vw; margin: 0; transform: translate(-50%, -50%);"
+            onmousewheel="return false;">
+        <div style="flex: 0 1 auto; background-color:#00000010; border-bottom: 1px solid #00000040; display:flex; align-items:center; padding: 0px 10px 0px 10px; line-height:2rem; position:relative;">
+            <div style="flex-grow: 1;">@Resource.SignIn</div>
+            <div style="display: flex; align-items:center; gap:10px;">
+                <button type="button" @onclick="HideDialog" style="border:none; outline:none; background-color:transparent; padding:4px; font-size:16px; cursor: pointer;">✖</button>
+            </div>
+        </div>
+        <div style="padding: 10px;">
+            <BlazorAccessControl.UI.SigninComponent.SignIn OnAuthenticationStateChange="Refresh" />
+        </div>
+    </dialog>
+}
+else
+{
+    <dialog @ref="dialogRef"
+            style="line-height:normal; cursor:auto;min-width: 300px; max-width: 600px; font-size: 14px; padding: 0px; max-height: calc(100vh - 20px); border: 1px solid gray; border-radius: 8px; box-shadow: 0px 0px 14px -5px rgba(66, 68, 90, 1); width: fit-content; top: 50vh; left: 50vw; margin: 0; transform: translate(-50%, -50%);"
+            onmousewheel="return false;">
+        @if (Show)
+        {
+            <div style="display:flex; flex-direction:column;">
+                <div ondragover="event.preventDefault();" style="flex: 0 1 auto; background-color:#00000010; border-bottom: 1px solid #00000040; display:flex; align-items:center; padding: 0px 10px 0px 10px; line-height:2rem; position:relative;">
+                    <div style="flex-grow: 1;"></div>
+                    <div style="display: flex; align-items:center; gap:10px;">
+                        <button type="button" @onclick="HideDialog" style="border:none; outline:none; background-color:transparent; padding:4px; font-size:16px; cursor: pointer;">✖</button>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: auto auto; gap: 15px; padding: 10px; align-items:center;">
+                    <div style="justify-self: end;">@Resource.UserId:</div>
+                    <div>@userService.CurrentUser?.Id</div>
+                    <div style="justify-self: end;">@Resource.UserDisplayName:</div>
+                    <div>@userService.CurrentUser?.DisplayName</div>
+                    <div style="justify-self: end;">@Resource.UserName:</div>
+                    <div>@userService.CurrentUser?.UserName</div>
+                    <div style="justify-self: end;">@Resource.UserEmail:</div>
+                    <div>@userService.CurrentUser?.Email</div>
+                    <div style="justify-self: end;">@Resource.UserRoles:</div>
+                    <div>@string.Join(", ", userService.CurrentUser?.GetRoles().Select(i => i?.Name ?? string.Empty) ?? [])</div>
+                </div>
+            </div>
+            <div style="flex: 0 1; background-color:#00000010; padding:4px 10px 4px 10px; border-top:1px solid #00000040;">
+                <div style="display:flex; gap:10px; justify-content:end;">
+                    <form method="post" action="@userService.GetSignOutEndPoint()">
+                        <input type="hidden" name="__RequestVerificationToken" value="@userService.GetAntiForgeryToken()" />
+                        <button type="submit" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">@Resource.SignOut</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </dialog>
+}
+@code {
+    [Parameter]
+    public string? Style { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private ElementReference dialogRef = default!;
+
+    private bool Show;
+
+    public async Task ShowDialog()
+    {
+        Show = true;
+        await InvokeAsync(StateHasChanged);
+        var dialogElement = await js.InvokeAsync<IJSObjectReference>("eval", dialogRef);
+        await dialogElement.InvokeVoidAsync("showModal");
+    }
+    private async Task HideDialog()
+    {
+        Show = false;
+        await InvokeAsync(StateHasChanged);
+        var dialogElement = await js.InvokeAsync<IJSObjectReference>("eval", dialogRef);
+        await dialogElement.InvokeVoidAsync("close");
+    }
+    private void Refresh()
+    {
+        nav.Refresh(true);
+    }
+}

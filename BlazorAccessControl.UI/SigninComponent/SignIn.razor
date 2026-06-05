@@ -10,16 +10,16 @@
 <div>
     @if (signinMethod != SignInMethod.UserNamePassword)
     {
-        <div style="display: flex; gap: 20px;">
-            <div style="align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="line-height:normal; align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
                 <form action="@userService.GetOAuthAuthenticationEndPoint()" method="post" style="align-self: stretch;">
                     <input type="hidden" id="_return_url_winauth" name="uri" required value="@(OAuthReturnURL)" />
 
-                    <button type="submit" style="border: none; outline: none; background-color:transparent; height: 100%;">使用Windows账号登录</button>
+                    <button type="submit" style="border: none; outline: none; background-color:transparent; height: 100%; width: 100%;">使用Windows账号登录</button>
                 </form>
             </div>
-            <div style="align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
-                <button @onclick="() => signinMethod = SignInMethod.UserNamePassword" style="background-color:transparent; border: none; outline: none; align-self: stretch; border-radius: 4px;">使用账号密码登录</button>
+            <div style="line-height:normal; align-self: stretch; border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                <button @onclick="() => signinMethod = SignInMethod.UserNamePassword" style="background-color:transparent; border: none; outline: none; align-self: stretch; border-radius: 4px; width: 100%;">使用账号密码登录</button>
             </div>
             
         </div>
@@ -36,7 +36,7 @@
                         <span style="display:flex; align-items:center;line-height: 1.2; white-space:nowrap; border: 1px solid gray; border-bottom: none; border-top-left-radius: 4px; border-top-right-radius: 4px; box-sizing:border-box; padding: var(--padding); width:fit-content; background-color: #f0f0f0;  ">
                             @Resource.UserName
                         </span>
-                        <div style="border: 1px solid gray; outline:none; border-radius: 4px; border-top-left-radius: 0px; box-sizing:border-box; font-family:inherit; font-size:inherit; min-width:100%; overflow:hidden; padding: 0px;">
+                        <div style="display:flex; border: 1px solid gray; outline:none; border-radius: 4px; border-top-left-radius: 0px; box-sizing:border-box; font-family:inherit; font-size:inherit; min-width:100%; overflow:hidden; padding: 0px;">
                             <input @bind="UserName" name="UserName" type="text" autocomplete="off" autocorrect="off" style="border: none; outline: none;width: 100%;height: 100%;background-color: transparent;color: inherit; padding: var(--padding);" />
                         </div>
                     </div>
@@ -49,7 +49,7 @@
                         <div style="border: 1px solid gray; outline:none; border-radius: 4px; border-top-left-radius: 0px; box-sizing:border-box; font-family:inherit; font-size:inherit; min-width:100%; overflow:hidden; padding: 0px; display:flex; flex-wrap:nowrap;">
                             <input @bind="Password" name="Password" type="@(RevealPassword ? "text" : "password")" autocomplete="off" autocorrect="off" style="padding: var(--padding); border: none;border-right: 1px solid gray;  outline: none;width: 100%;height: 100%;background-color: transparent;color: inherit;" />
                             <div style="box-sizing:border-box; cursor: pointer; height: 24px; width: 24px; overflow:hidden; display: flex; align-items:center; justify-content:center;" @onclick="toggleReviewPasswrod">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="@(RevealPassword ? "#000000" : "#909090")" d="M12 10.062c1.062 0 1.937.875 1.937 1.938A1.947 1.947 0 0 1 12 13.937 1.947 1.947 0 0 1 10.062 12c0-1.063.875-1.938 1.938-1.938m0-2.125A4.054 4.054 0 0 0 7.938 12 4.054 4.054 0 0 0 12 16.062 4.054 4.054 0 0 0 16.063 12 4.054 4.054 0 0 0 12 7.937m0-1.375C17.5 6.562 22 12 22 12s-4.5 5.438-10 5.438S2 12 2 12s4.5-5.438 10-5.438" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" style="all: initial;"><path fill="@(RevealPassword ? "#000000" : "#909090")" d="M12 10.062c1.062 0 1.937.875 1.937 1.938A1.947 1.947 0 0 1 12 13.937 1.947 1.947 0 0 1 10.062 12c0-1.063.875-1.938 1.938-1.938m0-2.125A4.054 4.054 0 0 0 7.938 12 4.054 4.054 0 0 0 12 16.062 4.054 4.054 0 0 0 16.063 12 4.054 4.054 0 0 0 12 7.937m0-1.375C17.5 6.562 22 12 22 12s-4.5 5.438-10 5.438S2 12 2 12s4.5-5.438 10-5.438" /></svg>
                             </div>
                         </div>
                     </div>
@@ -62,11 +62,11 @@
                 }
                 <div style="flex: 0 1;">
                     <div style="display:flex; gap:10px;">
-                        <button type="button" @onclick="() => {signinMethod = null; Password = string.Empty;}" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                        <button type="button" @onclick="() => {signinMethod = null; Password = string.Empty;}" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px; line-height:normal;">
                             @Resource.Back
                         </button>
                         <div style="flex-grow: 1"></div>
-                        <button type="button" @onclick="Submit" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">
+                        <button type="button" @onclick="Submit" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px; line-height:normal;">
                             @Resource.Continue
                         </button>
                     </div>

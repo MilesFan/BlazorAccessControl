@@ -195,4 +195,7 @@
   <data name="RoleId" xml:space="preserve">
     <value>Id</value>
   </data>
+  <data name="SignOut" xml:space="preserve">
+    <value>Sign Out</value>
+  </data>
 </root>
