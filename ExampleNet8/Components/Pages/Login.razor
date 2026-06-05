@@ -9,10 +9,13 @@
     <BlazorAccessControl.UI.SigninComponent.SignIn />
 </div>
 @code{
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        if (userService.CurrentUser is not null)
-            nav.NavigateTo("/");
-        base.OnInitialized();
+        if (firstRender)
+        {
+            if (userService.CurrentUser is not null)
+                nav.NavigateTo("/");
+        }
+        base.OnAfterRender(firstRender);
     }
 }

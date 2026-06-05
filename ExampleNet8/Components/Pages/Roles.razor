@@ -1,5 +1,5 @@
 ﻿@page "/roles"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @using BlazorAccessControl.UI.Roles
 @using BlazorAccessControl.EFCore
 <h3>Roles</h3>
