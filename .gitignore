@@ -14,3 +14,6 @@
 /ExampleNet8/bin
 /ExampleNet8/obj
 /ExampleNet8/Properties
+/ExampleNet8/database.db
+/ExampleNet8/database.db-shm
+/ExampleNet8/database.db-wal
