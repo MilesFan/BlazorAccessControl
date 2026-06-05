@@ -1,7 +1,6 @@
 ﻿using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
 using ExampleNet8;
-using ExampleNet8.Components.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using System.Web;
+
 public class DummyUserService : IUserService
 {
     public string? GetPasswordLoginEndPoint() => config.GetValue<string?>("Authentication:EndPoint_Password");
@@ -108,11 +107,21 @@ public class DummyUserService : IUserService
         get
         {
             if (_currentUser is not null) return _currentUser;
-            if (!signinManager.IsSignedIn(signinManager.Context.User)) return null;
-            using var context = contextFactory.CreateDbContext();
-            var userId = userManager.GetUserId(signinManager.Context.User);
-            _currentUser = context.Users.Include(i => i.Claims).FirstOrDefault(i => i.Id == userId);
-            return _currentUser;
+            try
+            {
+                if (!signinManager.IsSignedIn(signinManager.Context.User)) return null;
+                using var context = contextFactory.CreateDbContext();
+                var userId = userManager.GetUserId(signinManager.Context.User);
+                _currentUser = context.Users
+                                      .Include(i => i.UserRoles).ThenInclude(j=>j.Role)
+                                      .Include(i => i.Claims)
+                                      .FirstOrDefault(i => i.Id == userId);
+                return _currentUser;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
         }
     }
 
