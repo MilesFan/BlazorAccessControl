@@ -1,4 +1,5 @@
-﻿@inject IUserService userService
+﻿@using BlazorAccessControl.Interface
+@inject IUserService userService
 @inject NavigationManager nav
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -10,11 +11,23 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @userService.CurrentUser?.DisplayName
-            </NavLink>
-        </div>
+
+        @if (userService.CurrentUser is not null)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="ShowUserDialog" href="javascript:void(0)">
+                    <span class="bi bi-person-circle" aria-hidden="true"></span> @userService.CurrentUser?.DisplayName
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" @onclick="ShowUserDialog" href="javascript:void(0)">
+                    <span class="bi bi-person-circle" aria-hidden="true"></span> @BlazorAccessControl.UI.Resources.Resource.SignIn
+                </NavLink>
+            </div>
+        }
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -39,40 +52,13 @@
                 </NavLink>
             </BlazorAccessControl.UI.Misc.LanguageSelector>
         </div>
-@*         @foreach(var a in LanguageHelper.SupportedCultures)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" @onclick="()=>setLanguage(a.IetfLanguageTag)" href="javascript:void(0);">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @a.EnglishName
-                </NavLink>
-            </div>
-        } *@
-        @if (userService.CurrentUser is null)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="account/signin">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @BlazorAccessControl.UI.Resources.Resource.SignIn
-                </NavLink>
-            </div>
-        }
-        else
-        {
-            <div class="nav-item px-3">
-                <form method="post" action="@userService.GetSignOutEndPoint()">
-                    <input type="hidden" name="__RequestVerificationToken" value="@userService.GetAntiForgeryToken()" />
-                    <button type="submit" class="nav-link">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span>
-                        Logout
-                    </button>
-                </form>
-            </div>
-        }
     </nav>
 </div>
-
+<BlazorAccessControl.UI.Users.Self @ref="self" />
 
 @code
 {
+    private BlazorAccessControl.UI.Users.Self self = default!;
     private BlazorAccessControl.UI.Misc.LanguageSelector languageSelector = default!;
     private void setEN()
     {
@@ -85,5 +71,9 @@
     private void setLanguage(string IetfLanguageTag)
     {
         nav.NavigateTo($"setlanguage?redirectUri={System.Web.HttpUtility.UrlEncode(nav.Uri)}&languagecode={IetfLanguageTag}", true);
+    }
+    private async Task ShowUserDialog()
+    {
+        await self.ShowDialog();
     }
 }
