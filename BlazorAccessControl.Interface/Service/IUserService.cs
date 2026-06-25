@@ -4,31 +4,31 @@ using System.Text;
 
 namespace BlazorAccessControl.Interface
 {
-    public interface IUserService
+    public interface IUserService<TKey> where TKey:System.IEquatable<TKey>
     {
-        public IUser? CurrentUser { get; }
-        public Task<ICollection<IRole>> GetAllRolesAsync();
-        public Task<ICollection<IUser>> GetAllUsersAsync();
-        public Task<IUser?> GetUserByIdAsync(string id);
-        public Task<IUser?> GetUserByNameAsync(string id);
-        public Task<ICollection<IRole>> GetUserRolesAsync(IUser user);
-        public Task<IRole?> GetRoleByIdAsync(string id);
-        public Task CreateUserAsync(IUser user);
-        public Task UpdateUserAsync(IUser user);
-        public Task CreateRoleAsync(IRole role);
-        public Task UpdateRoleAsync(IRole role);
-        public Task SetPasswordAsync(string id, string Password);
-        public Task DeleteUserByIdAsync(string id);
-        public Task DeleteRoleByIdAsync(string id);
+        public IUser<TKey>? CurrentUser { get; }
+        public Task<ICollection<IRole<TKey>>> GetAllRolesAsync();
+        public Task<ICollection<IUser<TKey>>> GetAllUsersAsync();
+        public Task<IUser<TKey>?> GetUserByIdAsync(TKey id);
+        public Task<IUser<TKey>?> GetUserByNameAsync(string UserName);
+        public Task<ICollection<IRole<TKey>>> GetUserRolesAsync(IUser<TKey> user);
+        public Task<IRole<TKey>?> GetRoleByIdAsync(TKey id);
+        public Task CreateUserAsync(IUser<TKey> user);
+        public Task UpdateUserAsync(IUser<TKey> user);
+        public Task CreateRoleAsync(IRole<TKey> role);
+        public Task UpdateRoleAsync(IRole<TKey> role);
+        public Task SetPasswordAsync(TKey id, string Password);
+        public Task DeleteUserByIdAsync(TKey id);
+        public Task DeleteRoleByIdAsync(TKey id);
         public Task SignInAsync(string UserName);
         public Task SignInAsync(string UserName, string Password);
         public Task SignInAsync(Uri ExternalUrl);
         public Task SignInWithTokenAsync(string token);
         public Task PasswordSignIn(string UserName, string Password);
-        public Task SignOutAsync(IUser user);
+        public Task SignOutAsync(IUser<TKey> user);
         public Task SignOutAsync();
-        public Task ChangePasswordAsync(IUser user, string oldPassword, string newPassword);
-        public Task ResetPasswordAsync(IUser user, string newPassword);
+        public Task ChangePasswordAsync(IUser<TKey> user, string oldPassword, string newPassword);
+        public Task ResetPasswordAsync(IUser<TKey> user, string newPassword);
 
         public string GetAntiForgeryToken();
         
@@ -36,5 +36,8 @@ namespace BlazorAccessControl.Interface
         public string? GetSignOutEndPoint();
         public string? GetOAuthAuthenticationEndPoint();
         public string? GetOAuthValidationEndPoint();
+        public TKey NewUserId();
+        public TKey NewUserClaimId();
+        public TKey NewRoleId();
     }
 }

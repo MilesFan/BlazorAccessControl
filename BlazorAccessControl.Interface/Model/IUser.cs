@@ -1,8 +1,8 @@
 ﻿namespace BlazorAccessControl.Interface
 {
-    public interface IUser
+    public interface IUser<TKey> where TKey:System.IEquatable<TKey>
     {
-        public string Id { get; set; }
+        public TKey Id { get; set; }
 
         public string? UserName { get; set; }
 
@@ -10,15 +10,14 @@
 
         public string? Email { get; set; }
     
-        public ICollection<IRole> GetRoles();
-        public ICollection<IClaim> GetClaims(string? ClaimType = null);
+        public ICollection<IRole<TKey>> GetRoles();
+        public ICollection<IClaim<TKey>> GetClaims(string? ClaimType = null);
         
-        public void SetRoles(ICollection<IRole> roles);
-        public void SetClaims(ICollection<IClaim> roles);
+        public void SetRoles(ICollection<IRole<TKey>> roles);
+        public void SetClaims(ICollection<IClaim<TKey>> roles);
 
-        public void UpsertClaim(string ClaimType, string? ClaimValue);
+        public void UpsertClaim(TKey Id, string ClaimType, string? ClaimValue);
 
         public void RemoveClaim(string ClaimType);
-
     }
 }

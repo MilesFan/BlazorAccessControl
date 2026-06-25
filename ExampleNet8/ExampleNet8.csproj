@@ -4,12 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f7fb2257-1e3f-4888-a8af-e5b644dfec03</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorAccessControl.EFCore" Version="1.0.0" />
-    <PackageReference Include="BlazorAccessControl.Interface" Version="1.1.1" />
-    <PackageReference Include="BlazorAccessControl.UI" Version="1.0.3" />
+    <!--<PackageReference Include="BlazorAccessControl.EFCore" Version="1.0.0" />-->
+    <!--<PackageReference Include="BlazorAccessControl.Interface" Version="1.1.1" />-->
+    <!--<PackageReference Include="BlazorAccessControl.UI" Version="1.0.3" />-->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.27">
@@ -17,9 +18,17 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.27" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.27" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.19.1" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+	<PackageReference Include="Ulid" Version="1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorAccessControl.EFCore\BlazorAccessControl.EFCore.csproj" />
+    <ProjectReference Include="..\BlazorAccessControl.Interface\BlazorAccessControl.Interface.csproj" />
+    <ProjectReference Include="..\BlazorAccessControl.UI\BlazorAccessControl.UI.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,9 @@
 }
 table {
     border-collapse: collapse;
+    width:fit-content;
+    min-width:stretch;
+    table-layout:fixed;
 }
 th{
     text-align:center;
@@ -12,10 +15,18 @@ th{
 th, td {
     border: var(--border);
     padding: var(--padding);
+    word-wrap: break-word;
+    word-break:keep-all;
+    white-space:wrap;
 }
 button {
     border: var(--border);
     padding: var(--padding);
     border-radius: var(--border-radius);
     white-space: nowrap;
+}
+.text-truncated {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

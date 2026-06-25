@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BlazorAccessControl.Interface
 {
-    public interface IRole
+    public interface IRole<TKey> where TKey:System.IEquatable<TKey>
     {
-        public string Id { get; }
+        public TKey Id { get; }
         public string? Name { get; set; }
 
     }

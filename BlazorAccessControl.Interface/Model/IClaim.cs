@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BlazorAccessControl.Interface
 {
-    public interface IClaim
+    public interface IClaim<TKey> where TKey:System.IEquatable<TKey>
     {
-        public string Id { get; set; }
+        public TKey Id { get; set; }
         public string? ClaimType { get; set; }
         public string? ClaimValue { get; set; }
     }

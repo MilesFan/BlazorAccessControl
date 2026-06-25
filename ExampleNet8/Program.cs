@@ -25,31 +25,34 @@ namespace ExampleNet8
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
                     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
                 })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-                    options =>
-                    {
-                        options.LoginPath = "/account/signin";
-                        options.LogoutPath = "/account/signout";
-                        options.ForwardSignIn = "/account/signin";
-                    })
+                //.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                //    options =>
+                //    {
+                //        options.LoginPath = "/account/signin";
+                //        options.LogoutPath = "/account/signout";
+                //        options.ForwardSignIn = "/account/signin";
+                //        options.ExpireTimeSpan = TimeSpan.FromSeconds(5);
+                //    })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(s => {
                         s.LoginPath = "/account/signin";
                         s.LogoutPath = "/account/signout";
                         s.AccessDeniedPath ="/access-denied";
+                        s.ExpireTimeSpan = TimeSpan.FromDays(1);
+                        s.SlidingExpiration = true;
                     });
                 });
 
 
-            builder.Services.AddDbContextFactory<MyDBContext>(lifetime: ServiceLifetime.Transient);
+            builder.Services.AddDbContextFactory<MyDBContext<Guid>>(lifetime: ServiceLifetime.Transient);
 
-            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<MyDBContext>()
+            builder.Services.AddIdentityCore<ApplicationUser<Guid>>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<ApplicationRole<Guid>>()
+                .AddEntityFrameworkStores<MyDBContext<Guid>>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<IUserService, DummyUserService>();
+            builder.Services.AddScoped<IUserService<Guid>, DummyUserServiceGuid>();
 
             var app = builder.Build();
 
@@ -69,7 +72,7 @@ namespace ExampleNet8
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             
-            DummyUserService.MapLoginUrl(app);
+            DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();
             app.MapGet("/setlanguage", LanguageHelper.SetLanguage);
 

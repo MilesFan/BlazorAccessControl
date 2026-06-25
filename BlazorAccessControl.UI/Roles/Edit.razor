@@ -1,6 +1,7 @@
-﻿@typeparam TRole where TRole : IRole, new()
+﻿@typeparam TKey where TKey:System.IEquatable<TKey>
+@typeparam TRole where TRole : IRole<TKey>, new()
 @inject IJSRuntime js
-@inject IUserService userService
+@inject IUserService<TKey> userService
 
 <dialog @ref="dialogRef"
         style="min-width: 300px; font-size: 14px; padding: 0px; max-height: calc(100vh - 20px); border: 1px solid gray; border-radius: 8px; box-shadow: 0px 0px 14px -5px rgba(66, 68, 90, 1); width: fit-content; top: 50vh; left: 50vw; margin: 0; transform: translate(-50%, -50%);"
@@ -98,19 +99,22 @@ else if (Role is not null)
 @code {
 
     [Parameter]
-    public string? Id { get; set; }
+    public TKey? Id { get; set; }
+
+    [Parameter]
+    public bool CreateNew { get; set; }
 
     [Parameter]
     public EventCallback<bool> OnChange { get; set; }
 
     private bool isNew = false;
     private bool isLoading = true;
-    private IRole? Role;
+    private IRole<TKey>? Role;
     private ElementReference dialogRef = default!;
     private class RoleInfo
     {
         public bool Checked { get; set; }
-        public required IRole Role { get; init; }
+        public required IRole<TKey> Role { get; init; }
     }
     private IReadOnlyCollection<RoleInfo> RoleInfos { get; set; } = Array.Empty<RoleInfo>();
 
@@ -119,10 +123,19 @@ else if (Role is not null)
         bool needReload = false;
         foreach(var parameter in parameters)
         {
-            if (parameter.Name == nameof(Id))
+            if (parameter.Name == nameof(CreateNew))
             {
-                var value = parameter.Value as string;
-                if (value!=Id)
+                var _createNew = (bool)parameter.Value;
+                if (_createNew!=CreateNew)
+                {
+                    needReload = true;
+                    CreateNew = _createNew;
+                }
+            }
+            else if (parameter.Name == nameof(Id))
+            {
+                var value = (TKey)parameter.Value;
+                if ((value is null && Id is not null) || (value is not null && !value.Equals(Id)))
                 {
                     needReload = true;
                     Id = value;
@@ -149,7 +162,7 @@ else if (Role is not null)
     }
     private async Task ReloadAsync()
     {
-        if (Id is null || Id == "new")
+        if (Id is null || CreateNew)
         {
             isNew = true;
             Role = new TRole { Name = string.Empty };

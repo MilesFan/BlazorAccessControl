@@ -1,8 +1,8 @@
-﻿@using System.Globalization
+﻿@typeparam TKey where TKey : System.IEquatable<TKey>
 @using System.Threading.Tasks
 @inject IJSRuntime js
 @inject NavigationManager nav
-@inject IUserService userService
+@inject IUserService<TKey> userService
 @if (userService.CurrentUser is null)
 {
     <dialog @ref="dialogRef"
@@ -15,7 +15,7 @@
             </div>
         </div>
         <div style="padding: 10px;">
-            <BlazorAccessControl.UI.SigninComponent.SignIn OnAuthenticationStateChange="Refresh" />
+            <BlazorAccessControl.UI.SigninComponent.SignIn TKey="TKey" OnAuthenticationStateChange="Refresh" />
         </div>
     </dialog>
 }
@@ -35,7 +35,7 @@ else
                 </div>
                 <div style="display: grid; grid-template-columns: auto auto; gap: 15px; padding: 10px; align-items:center;">
                     <div style="justify-self: end;">@Resource.UserId:</div>
-                    <div>@userService.CurrentUser?.Id</div>
+                    <div>@userService.CurrentUser?.Id.ToString()</div>
                     <div style="justify-self: end;">@Resource.UserDisplayName:</div>
                     <div>@userService.CurrentUser?.DisplayName</div>
                     <div style="justify-self: end;">@Resource.UserName:</div>

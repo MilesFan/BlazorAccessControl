@@ -1,6 +1,7 @@
-﻿@typeparam TUser where TUser : IUser, new()
+﻿@typeparam TKey where TKey : System.IEquatable<TKey>
+@typeparam TUser where TUser : IUser<TKey>, new()
 @inject IJSRuntime js
-@inject IUserService userService
+@inject IUserService<TKey> userService
 <dialog @ref="dialogRef"
         style="min-width: 300px; max-width: 600px; font-size: 14px; padding: 0px; max-height: calc(100vh - 20px); border: 1px solid gray; border-radius: 8px; box-shadow: 0px 0px 14px -5px rgba(66, 68, 90, 1); width: fit-content; top: 50vh; left: 50vw; margin: 0; transform: translate(-50%, -50%);"
         onmousewheel="return false;">
@@ -90,7 +91,7 @@
                 <div style="flex-grow: 1"></div>
                 @if (!isNew && User is not null)
                 {
-                    <ResetPasswordDialog UserId="@User!.Id" ButtonStyle="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px; white-space:nowrap;" ButtonText="@Resource.UserResetPassword" />
+                    <ResetPasswordDialog TKey="TKey" UserId="@User!.Id" ButtonStyle="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px; white-space:nowrap;" ButtonText="@Resource.UserResetPassword" />
                     <ConfirmationDialog ButtonText="@Resource.Delete" ButtonStyle="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px; background-color:orange;" Message="@Resource.DeleteConfirm" OnConfirm="DeleteAsync" />
                 }
             </div>
@@ -149,21 +150,23 @@ else if (User is not null)
 </dialog> *@
 
 @code {
+    [Parameter]
+    public bool CreateNew { get; set; }
 
     [Parameter]
-    public string? Id { get; set; }
+    public TKey? Id { get; set; }
 
     [Parameter]
     public EventCallback<bool> OnChange { get; set; }
 
     private bool isNew = false;
     private bool isLoading = true;
-    private IUser? User;
+    private IUser<TKey>? User;
     private ElementReference dialogRef = default!;
     private class RoleInfo
     {
         public bool Checked { get; set; }
-        public required IRole Role { get; init; }
+        public required IRole<TKey> Role { get; init; }
     }
     private IReadOnlyCollection<RoleInfo> RoleInfos { get; set; } = Array.Empty<RoleInfo>();
 
@@ -174,10 +177,19 @@ else if (User is not null)
         bool needReload = false;
         foreach(var parameter in parameters)
         {
-            if (parameter.Name == nameof(Id))
+            if (parameter.Name == nameof(CreateNew))
             {
-                var value = parameter.Value as string;
-                if (value!=Id)
+                var _createNew = (bool)parameter.Value;
+                if (_createNew != CreateNew)
+                {
+                    needReload = true;
+                    CreateNew = _createNew;
+                }
+            }
+            else if (parameter.Name == nameof(Id))
+            {
+                var value = (TKey)parameter.Value;
+                if ((value is null && Id is not null) || (value is not null && !value.Equals(Id)))
                 {
                     needReload = true;
                     Id = value;
@@ -204,13 +216,14 @@ else if (User is not null)
     }
     private async Task ReloadAsync()
     {
-        if (Id is null || Id == "new")
+        if (CreateNew)
         {
             isNew = true;
             User = new TUser();
         }
         else
         {
+            if (Id?.Equals(default) != false) throw new Exception("Id Not Provided");
             isNew = false;
             User = await userService.GetUserByIdAsync(Id) ?? throw new Exception("User Not Found");
         }
@@ -232,7 +245,7 @@ else if (User is not null)
             var roles = RoleInfos
                             .Where(i => i.Checked)
                             .Select(i=>i.Role)
-                            .ToArray() ?? Array.Empty<IRole>();
+                            .ToArray() ?? Array.Empty<IRole<TKey>>();
             User.SetRoles(roles);
             if (isNew)
             {

@@ -1,12 +1,10 @@
-﻿@using Microsoft.AspNetCore.Antiforgery
-@using Microsoft.AspNetCore.Http
-@using Microsoft.Extensions.Configuration
-@using System.Web
+﻿@typeparam TKey where TKey : System.IEquatable<TKey>
 @using System.Threading.Tasks
+@using Microsoft.AspNetCore.Http
 @inject IJSRuntime js
 @inject NavigationManager nav
 @inject IHttpContextAccessor httpContextAccessor
-@inject IUserService userService
+@inject IUserService<TKey> userService
 <div>
     @if (signinMethod != SignInMethod.UserNamePassword)
     {

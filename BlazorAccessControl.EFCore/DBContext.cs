@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorAccessControl.EFCore
 {
-    public abstract class DBContext: IdentityDbContext<ApplicationUser, ApplicationRole, string,
-        ApplicationUserClaim, ApplicationUserRole, ApplicationUserLogin,
-        ApplicationRoleClaim, ApplicationUserToken>
+    public abstract class DBContext<TKey>: IdentityDbContext<ApplicationUser<TKey>, ApplicationRole<TKey>, TKey,
+        ApplicationUserClaim<TKey>, ApplicationUserRole<TKey>, ApplicationUserLogin<TKey>,
+        ApplicationRoleClaim<TKey>, ApplicationUserToken<TKey>> where TKey: System.IEquatable<TKey>
     {
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ApplicationUser>(b =>
+            modelBuilder.Entity<ApplicationUser<TKey>>(b =>
             {
                 // Each User can have many UserClaims
                 b.HasMany(e => e.Claims)
@@ -40,10 +40,10 @@ namespace BlazorAccessControl.EFCore
                     .IsRequired();
             });
             
-            modelBuilder.Entity<ApplicationUserClaim>(b => b.HasKey(uc => uc.Id));
-            modelBuilder.Entity<ApplicationRoleClaim>(b => b.HasKey(rc => rc.Id));
+            modelBuilder.Entity<ApplicationUserClaim<TKey>>(b => b.HasKey(uc => uc.Id));
+            modelBuilder.Entity<ApplicationRoleClaim<TKey>>(b => b.HasKey(rc => rc.Id));
 
-            modelBuilder.Entity<ApplicationRole>(b =>
+            modelBuilder.Entity<ApplicationRole<TKey>>(b =>
             {
                 // Each Role can have many entries in the UserRole join table
                 b.HasMany(e => e.UserRoles)

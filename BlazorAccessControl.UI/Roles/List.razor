@@ -1,5 +1,6 @@
-@typeparam TRole where TRole : IRole, new()
-@inject IUserService userService
+@typeparam TKey where TKey : System.IEquatable<TKey>
+@typeparam TRole where TRole : IRole<TKey>, new()
+@inject IUserService<TKey> userService
 @inject IJSRuntime js
 <div style="display:flex; gap: 10px; margin-bottom: 1rem;">
     <button @onclick="Create">@Resource.Create</button>
@@ -26,22 +27,25 @@
             }
         </tbody>
     </table>
-    @if (roleIdInEdit!=null)
+    @if (roleIdInEdit?.Equals(default) == false || CreateNew == true)
     {
-        <Edit TRole="TRole" Id="@roleIdInEdit" OnChange="OnEditComponentChanged" />
+        <Edit TKey="TKey" TRole="TRole" Id="@roleIdInEdit" CreateNew="CreateNew" OnChange="OnEditComponentChanged" />
     }
 </div>
 
 @code {
-    private ICollection<IRole> roles = Array.Empty<IRole>();
-    private string? roleIdInEdit;
-    private Task Create()
+    private ICollection<IRole<TKey>> roles = Array.Empty<IRole<TKey>>();
+    private TKey? roleIdInEdit;
+    private bool CreateNew;
+    private void Create()
     {
-        return Edit("new");
+        roleIdInEdit = default;
+        CreateNew = true;
     }
-    private async Task Edit(string id)
+    private void Edit(TKey? id)
     {
         roleIdInEdit = id;
+        CreateNew = false;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -49,8 +53,8 @@
     }
     private async Task OnEditComponentChanged(bool needReload)
     {
-        roleIdInEdit = null;
-        roleIdInEdit = null;
+        roleIdInEdit = default;
+        CreateNew = false;
         if (needReload)
         {
             await ReloadAsync();
@@ -64,7 +68,7 @@
         }
         catch (Exception ex)
         {
-            roles = Array.Empty<IRole>();
+            roles = Array.Empty<IRole<TKey>>();
             Console.Error.WriteLine($"failed to load users: {ex}");
             //await js.InvokeVoidAsync("alert", $"º”‘ÿ”√ªß ß∞‹: {ex.Message}");
         }

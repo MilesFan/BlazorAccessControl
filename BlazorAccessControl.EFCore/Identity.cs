@@ -8,16 +8,16 @@ using System.Xml.Linq;
 namespace BlazorAccessControl.EFCore
 {
 
-    public class ApplicationUser: IdentityUser<string>, IUser
+    public class ApplicationUser<TKey>: IdentityUser<TKey>, IUser<TKey> where TKey:System.IEquatable<TKey>
     {
-        public ApplicationUser()
-        {
-            Id = Ulid.NewUlid().ToString();
-            SecurityStamp = Ulid.NewUlid().ToString();
-            ConcurrencyStamp = Ulid.NewUlid().ToString();
-            UserName = string.Empty;
+        //public ApplicationUser()
+        //{
+        //    Id = NewId();
+        //    SecurityStamp = Ulid.NewUlid().ToString();
+        //    ConcurrencyStamp = Ulid.NewUlid().ToString();
+        //    UserName = string.Empty;
 
-        }
+        //}
         public string? DisplayName {
             get
             {
@@ -29,21 +29,21 @@ namespace BlazorAccessControl.EFCore
                 return displayname?.ClaimValue ?? UserName;
             } 
         }
-        public virtual List<ApplicationUserClaim> Claims { get; set; } = new List<ApplicationUserClaim>();
+        public virtual List<ApplicationUserClaim<TKey>> Claims { get; set; } = new List<ApplicationUserClaim<TKey>>();
 
-        public virtual ICollection<ApplicationUserLogin> Logins { get; set; } = new List<ApplicationUserLogin>();
-        public virtual ICollection<ApplicationUserToken> Tokens { get; set; } = new List<ApplicationUserToken>();
-        public virtual List<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
-        public ICollection<IRole> GetRoles()
+        public virtual ICollection<ApplicationUserLogin<TKey>> Logins { get; set; } = new List<ApplicationUserLogin<TKey>>();
+        public virtual ICollection<ApplicationUserToken<TKey>> Tokens { get; set; } = new List<ApplicationUserToken<TKey>>();
+        public virtual List<ApplicationUserRole<TKey>> UserRoles { get; set; } = new List<ApplicationUserRole<TKey>>();
+        public ICollection<IRole<TKey>> GetRoles()
         {
-            return UserRoles.Select(i=>i.Role).Cast<IRole>().ToArray();
+            return UserRoles.Select(i=>i.Role).Cast<IRole<TKey>>().ToArray();
         }
-        public ICollection<IClaim> GetClaims(string? ClaimType = null) =>
+        public ICollection<IClaim<TKey>> GetClaims(string? ClaimType = null) =>
                 Claims.Where(i=> ClaimType is null || i.ClaimType == ClaimType)
-                      .Cast<IClaim>()
+                      .Cast<IClaim<TKey>>()
                       .ToArray();
 
-        public void SetClaims(ICollection<IClaim> claims) => Claims = claims.Cast<ApplicationUserClaim>().ToList();
+        public void SetClaims(ICollection<IClaim<TKey>> claims) => Claims = claims.Cast<ApplicationUserClaim<TKey>>().ToList();
 
 
         public void RemoveClaim(string ClaimType)
@@ -57,11 +57,11 @@ namespace BlazorAccessControl.EFCore
             }
         }
 
-        public void SetRoles(ICollection<IRole> roles)
+        public void SetRoles(ICollection<IRole<TKey>> roles)
         {
             UserRoles = roles
-                .Cast<ApplicationRole>()
-                .Select(i=>new ApplicationUserRole {
+                .Cast<ApplicationRole<TKey>>()
+                .Select(i=>new ApplicationUserRole<TKey> {
                     Role = i,
                     RoleId = i.Id,
                     User = this,
@@ -70,7 +70,7 @@ namespace BlazorAccessControl.EFCore
                 .ToList();
         }
 
-        public void UpsertClaim(string ClaimType, string? ClaimValue)
+        public void UpsertClaim(TKey Id, string ClaimType, string? ClaimValue)
         {
             if (string.IsNullOrEmpty(ClaimValue))
                 RemoveClaim(ClaimType);
@@ -83,9 +83,9 @@ namespace BlazorAccessControl.EFCore
                 }
                 else
                 {
-                    Claims.Add(new ApplicationUserClaim
+                    Claims.Add(new ApplicationUserClaim<TKey>
                         {
-                            Id = Ulid.NewUlid().ToString(),
+                            Id = default!,
                             ClaimType =  ClaimType,
                             ClaimValue = ClaimValue,
                             User = this,
@@ -96,43 +96,46 @@ namespace BlazorAccessControl.EFCore
         }
     }
 
-    public class ApplicationRole: IdentityRole<string>, IRole
+    public class ApplicationRole<TKey>: IdentityRole<TKey>, IRole<TKey> where TKey:System.IEquatable<TKey>
     {
-        public ApplicationRole()
-        {
-            Id = Ulid.NewUlid().ToString();
-        }
-        public virtual ICollection<ApplicationUserRole> UserRoles { get; set; } = new List<ApplicationUserRole>();
-        public virtual ICollection<ApplicationRoleClaim> RoleClaims { get; set; } = new List<ApplicationRoleClaim>();
+        //public ApplicationRole()
+        //{
+        //    Id = Ulid.NewUlid().ToString();
+        //}
+        public virtual ICollection<ApplicationUserRole<TKey>> UserRoles { get; set; } = new List<ApplicationUserRole<TKey>>();
+        public virtual ICollection<ApplicationRoleClaim<TKey>> RoleClaims { get; set; } = new List<ApplicationRoleClaim<TKey>>();
     }
 
-    public class ApplicationUserRole: IdentityUserRole<string>
+    public class ApplicationUserRole<TKey>: IdentityUserRole<TKey> where TKey:System.IEquatable<TKey>
     {
-        public virtual ApplicationUser User { get; set; } = default!;
-        public virtual ApplicationRole Role { get; set; } = default!;
+        public virtual ApplicationUser<TKey> User { get; set; } = default!;
+        public virtual ApplicationRole<TKey> Role { get; set; } = default!;
     }
 
-    public class ApplicationUserClaim : IdentityUserClaim<string>, IClaim
+    public class ApplicationUserClaim<TKey> : IdentityUserClaim<TKey>, IClaim<TKey> where TKey:System.IEquatable<TKey>
     {
-        [Key, StringLength(26)]
-        public new string Id { get; set;} = Ulid.NewUlid().ToString();
-        public virtual ApplicationUser User { get; set; } = default!;
+        //[Key, StringLength(26)]
+        //public new string Id { get; set;} = Ulid.NewUlid().ToString();
+
+        [Key, StringLength(40)]
+        public new required TKey Id { get; set;}
+        public virtual ApplicationUser<TKey> User { get; set; } = default!;
     }
 
-    public class ApplicationUserLogin : IdentityUserLogin<string>
+    public class ApplicationUserLogin<TKey> : IdentityUserLogin<TKey> where TKey:System.IEquatable<TKey>
     {
-        public virtual ApplicationUser User { get; set; } = default!;
+        public virtual ApplicationUser<TKey> User { get; set; } = default!;
     }
 
-    public class ApplicationRoleClaim : IdentityRoleClaim<string>
+    public class ApplicationRoleClaim<TKey> : IdentityRoleClaim<TKey> where TKey:System.IEquatable<TKey>
     {
-        [Key, StringLength(26)]
-        public new string Id { get; set;} = Ulid.NewUlid().ToString();
-        public virtual ApplicationRole Role { get; set; } = default!;
+        //[Key, StringLength(26)]
+        //public new TKey Id { get; set;} = Ulid.NewUlid().ToString();
+        public virtual ApplicationRole<TKey> Role { get; set; } = default!;
     }
 
-    public class ApplicationUserToken : IdentityUserToken<string>
+    public class ApplicationUserToken<TKey> : IdentityUserToken<TKey> where TKey:System.IEquatable<TKey>
     {
-        public virtual ApplicationUser User { get; set; } = default!;
+        public virtual ApplicationUser<TKey> User { get; set; } = default!;
     }
 }
