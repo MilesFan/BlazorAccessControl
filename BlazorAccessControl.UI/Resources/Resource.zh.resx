@@ -198,4 +198,7 @@
   <data name="SignOut" xml:space="preserve">
     <value>退出登录</value>
   </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>更改密码</value>
+  </data>
 </root>

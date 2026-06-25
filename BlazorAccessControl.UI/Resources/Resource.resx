@@ -198,4 +198,7 @@
   <data name="SignOut" xml:space="preserve">
     <value>Sign Out</value>
   </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
 </root>

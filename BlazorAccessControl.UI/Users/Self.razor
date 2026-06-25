@@ -42,11 +42,20 @@ else
                     <div>@userService.CurrentUser?.UserName</div>
                     <div style="justify-self: end;">@Resource.UserEmail:</div>
                     <div>@userService.CurrentUser?.Email</div>
-                    <div style="justify-self: end;">@Resource.UserRoles:</div>
-                    <div>@string.Join(", ", userService.CurrentUser?.GetRoles().Select(i => i?.Name ?? string.Empty) ?? [])</div>
+                    <div style="justify-self: end; align-self: start;">@Resource.UserRoles:</div>
+                    <div class="roles">
+                        @foreach (var role in userService.CurrentUser?.GetRoles() ?? [])
+                        {
+                            <span class="role">@role.Name</span>
+                        }
+                    </div>
                 </div>
             </div>
-            <div style="flex: 0 1; background-color:#00000010; padding:4px 10px 4px 10px; border-top:1px solid #00000040;">
+            <div style="flex: 0 1; background-color:#00000010; padding:4px 10px 4px 10px; border-top:1px solid #00000040; display:flex; justify-content:space-between;">
+                @if (userService.CurrentUser is not null && userService.CurrentUser.Id.Equals(default(TKey)) == false)
+                {
+                    <ResetPasswordDialog TKey="TKey" UserId="@(userService.CurrentUser.Id)" ButtonText="@Resource.ChangePassword" ButtonStyle="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;" />
+                }
                 <div style="display:flex; gap:10px; justify-content:end;">
                     <form method="post" action="@userService.GetSignOutEndPoint()">
                         <input type="hidden" name="__RequestVerificationToken" value="@userService.GetAntiForgeryToken()" />

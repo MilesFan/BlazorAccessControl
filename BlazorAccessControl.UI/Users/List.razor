@@ -11,7 +11,8 @@
             <col style="min-width: 10rem;" />
             <col style="min-width: 10rem;" />
             <col style="min-width: 100px;" />
-            <col style="min-width: 10rem;" />
+            <col style="min-width: 20rem;" />
+            <col style="max-width: 5rem;" />
         </colgroup>
         <thead>
             <tr>
@@ -21,18 +22,38 @@
                 <th>@Resource.UserRoles</th>
                 <th></th>
             </tr>
+            <tr class="filter-row">
+                <th><input @bind="filterUserDisplayName" @bind:after="OnFilterChange" @bind:event="oninput" type="search" placeholder="" /></th>
+                <th><input @bind="filterUserName" @bind:after="OnFilterChange" @bind:event="oninput" type="search" placeholder="" /></th>
+                <th><input @bind="filterEmail" @bind:after="OnFilterChange" @bind:event="oninput" type="search" placeholder="" /></th>
+                <th><input @bind="filterRole" @bind:after="OnFilterChange" @bind:event="oninput" type="search" placeholder="" /></th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-            @foreach (var item in users)
+        @{
+            var hasRoleFilter = !string.IsNullOrWhiteSpace(filterRole);
+            foreach (var item in users)
             {
                 <tr>
                     <td>@item.DisplayName</td>
                     <td>@item.UserName</td>
                     <td class="text-truncated">@item.Email</td>
-                    <td>@string.Join(", ", item.GetRoles().Select(r=>r.Name))</td>
+                    <td>
+                        <div class="roles">
+                            @foreach (var role in item.GetRoles())
+                            {
+                                var highlighed = hasRoleFilter && role.Name?.Contains(filterRole, StringComparison.OrdinalIgnoreCase) == true;
+                                <span class="role@(highlighed? " highlighted": "")">@role.Name</span>
+                            }
+                        </div>
+
+                        @* @string.Join(", ", item.GetRoles().Select(r=>r.Name)) *@
+                    </td>
                     <td><button @onclick="() => Edit(item.Id)">@Resource.Edit</button></td>
                 </tr>
             }
+        }
         </tbody>
     </table>
     @if (userIdInEdit?.Equals(default(TKey)) == false || CreateNew == true)
@@ -41,9 +62,14 @@
     }
 </div>
 @code {
+    private ICollection<IUser<TKey>> usersAll = Array.Empty<IUser<TKey>>();
     private ICollection<IUser<TKey>> users = Array.Empty<IUser<TKey>>();
     private TKey? userIdInEdit;
     private bool CreateNew;
+    private string? filterUserDisplayName;
+    private string? filterUserName;
+    private string? filterEmail;
+    private string? filterRole;
     private void Create()
     {
         userIdInEdit = default;
@@ -75,14 +101,42 @@
     {
         try
         {
-            users = await userService.GetAllUsersAsync();
+            usersAll = await userService.GetAllUsersAsync();
+            users = usersAll;
         }
         catch (Exception ex)
         {
-            users = Array.Empty<IUser<TKey>>();
+            usersAll = Array.Empty<IUser<TKey>>();
+            users = usersAll;
             Console.Error.WriteLine($"failed to load users: {ex}");
             //await js.InvokeVoidAsync("alert", $"º”‘ÿ”√ªß ß∞‹: {ex.Message}");
         }
     }
-
+    private async Task OnFilterChange()
+    {
+        IEnumerable<IUser<TKey>> filterUsers = usersAll;
+        if (!string.IsNullOrEmpty(filterUserDisplayName))
+        {
+            filterUsers = filterUsers.Where(i =>
+                i.GetClaims()
+                 .Any(c => c.ClaimType?.StartsWith("DisplayName-") == true &&
+                           c.ClaimValue?.Contains(filterUserDisplayName, StringComparison.OrdinalIgnoreCase) == true));
+        }
+        if (!string.IsNullOrEmpty(filterUserName))
+        {
+            filterUsers = filterUsers.Where(i => i.UserName?.Contains(filterUserName, StringComparison.OrdinalIgnoreCase) == true);
+        }
+        if (!string.IsNullOrEmpty(filterEmail))
+        {
+            filterUsers = filterUsers.Where(i => i.Email?.Contains(filterEmail, StringComparison.OrdinalIgnoreCase) == true);
+        }
+        if (!string.IsNullOrEmpty(filterRole))
+        {
+            filterUsers = filterUsers.Where(i =>
+                i.GetRoles()
+                 .Any(r => r.Name?.Contains(filterRole, StringComparison.OrdinalIgnoreCase) == true));
+        }
+        users = filterUsers.ToArray();
+    }
 }
+

@@ -65,7 +65,6 @@ namespace ExampleNet8
             }
 
             app.UseHttpsRedirection();
-
             app.UseStaticFiles();
             app.UseAntiforgery();
 
