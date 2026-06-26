@@ -4,7 +4,7 @@
 	<TargetFrameworks>net8.0; net9.0; net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<Version>1.1.0</Version>
+	<Version>1.1.1</Version>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageProjectUrl>https://github.com/MilesFan/BlazorAccessControl</PackageProjectUrl>
@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <!--<PackageReference Include="BlazorAccessControl.Interface" Version="*" />-->
+    <PackageReference Include="BlazorAccessControl.Interface" Version="1.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="*" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="*" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="*" />
@@ -55,7 +56,7 @@
 			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
-	<ItemGroup>
+	<!--<ItemGroup>
 	  <ProjectReference Include="..\BlazorAccessControl.Interface\BlazorAccessControl.Interface.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
 </Project>
