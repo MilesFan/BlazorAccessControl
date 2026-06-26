@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="BlazorAccessControl.EFCore" Version="1.0.0" />-->
-    <!--<PackageReference Include="BlazorAccessControl.Interface" Version="1.1.1" />-->
-    <!--<PackageReference Include="BlazorAccessControl.UI" Version="1.0.3" />-->
+    <PackageReference Include="BlazorAccessControl.EFCore" Version="1.1.0" />
+    <PackageReference Include="BlazorAccessControl.Interface" Version="1.2.1" />
+    <PackageReference Include="BlazorAccessControl.UI" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.27">
@@ -25,10 +25,10 @@
 	<PackageReference Include="Ulid" Version="1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <ProjectReference Include="..\BlazorAccessControl.EFCore\BlazorAccessControl.EFCore.csproj" />
     <ProjectReference Include="..\BlazorAccessControl.Interface\BlazorAccessControl.Interface.csproj" />
     <ProjectReference Include="..\BlazorAccessControl.UI\BlazorAccessControl.UI.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿@using BlazorAccessControl.Interface
-@inject IUserService userService
+@inject IUserService<Guid> userService
 @inject NavigationManager nav
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -54,11 +54,11 @@
         </div>
     </nav>
 </div>
-<BlazorAccessControl.UI.Users.Self @ref="self" />
+<BlazorAccessControl.UI.Users.Self TKey="Guid" @ref="self" />
 
 @code
 {
-    private BlazorAccessControl.UI.Users.Self self = default!;
+    private BlazorAccessControl.UI.Users.Self<Guid> self = default!;
     private BlazorAccessControl.UI.Misc.LanguageSelector languageSelector = default!;
     private void setEN()
     {

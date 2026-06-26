@@ -41,16 +41,15 @@ namespace ExampleNet10
                     });
                 });
 
-            builder.Services.AddDbContextFactory<MyDBContext>();
-            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<MyDBContext>()
+            builder.Services.AddDbContextFactory<MyDBContext<Guid>>(lifetime: ServiceLifetime.Transient);
+
+            builder.Services.AddIdentityCore<ApplicationUser<Guid>>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<ApplicationRole<Guid>>()
+                .AddEntityFrameworkStores<MyDBContext<Guid>>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<IUserService, DummyUserService>();
-            //builder.Services.AddScoped<HttpContextAccessor>();
-            //    .AddScoped<Microsoft.AspNetCore.Http.IHttpContextAccessor>(sp => sp.GetRequiredService<HttpContextAccessor>());
+            builder.Services.AddScoped<IUserService<Guid>, DummyUserServiceGuid>();
 
             var app = builder.Build();
 
@@ -71,7 +70,7 @@ namespace ExampleNet10
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-            DummyUserService.MapLoginUrl(app);
+            DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();
             app.MapGet("/setlanguage", LanguageHelper.SetLanguage);
             //using (var serviceScope = app.Services.CreateScope())

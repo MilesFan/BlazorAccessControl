@@ -1,6 +1,5 @@
 ﻿@page "/roles"
 @attribute [Authorize(Roles = "Admin")]
 @using BlazorAccessControl.UI.Roles
-@using BlazorAccessControl.EFCore
 <h3>Roles</h3>
-<List TKey="Guid" TRole="ApplicationRole<Guid>" />
+<List TKey="Guid" TRole="BlazorAccessControl.EFCore.ApplicationRole<Guid>" />

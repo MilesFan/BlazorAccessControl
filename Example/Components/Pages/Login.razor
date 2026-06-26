@@ -1,11 +1,11 @@
 ﻿@page "/account/signin"
-@inject IUserService userService
+@inject IUserService<Guid> userService
 @inject NavigationManager nav
 <div style="margin: 0 auto; max-width: 800px;">
 
     <h3>Sign In</h3>
     <hr />
-    <BlazorAccessControl.UI.SigninComponent.SignIn />
+    <BlazorAccessControl.UI.SigninComponent.SignIn TKey="Guid" />
 </div>
 @code{
     protected override void OnInitialized()
