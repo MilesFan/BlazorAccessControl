@@ -436,16 +436,16 @@ public class DummyUserServiceGuid: IUserService<Guid>
         if (httpContext == null) return string.Empty;
         return antiforgery?.GetAndStoreTokens(httpContext).RequestToken ?? string.Empty;
     }
-    public Guid NewUserId()
+    public Task<Guid> NewUserId()
     {
-        return Guid.NewGuid();
+        return Task.FromResult(Guid.NewGuid());
     }
-    public Guid NewUserClaimId()
+    public Task<Guid> NewUserClaimId()
     {
-        return Guid.NewGuid();
+        return Task.FromResult(Guid.NewGuid());
     }
-    public Guid NewRoleId()
+    public Task<Guid> NewRoleId()
     {
-        return Guid.NewGuid();
+        return Task.FromResult(Guid.NewGuid());
     }
 }

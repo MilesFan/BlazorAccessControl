@@ -1,6 +1,6 @@
 ﻿using BlazorAccessControl.EFCore;
 using BlazorAccessControl.Interface;
-using ExampleNet8;
+using ExampleNet10;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-public class DummyUserServiceULID: IUserService<string>
+public class DummyUserServiceGuid: IUserService<Guid>
 {
     public string? GetPasswordLoginEndPoint() => config.GetValue<string?>("Authentication:EndPoint_Password");
     public string? GetSignOutEndPoint() => config.GetValue<string?>("Authentication:EndPoint_Signout");
@@ -21,11 +21,11 @@ public class DummyUserServiceULID: IUserService<string>
     {
         using var serviceScope = app.Services.CreateScope();
         var services = serviceScope.ServiceProvider;
-        var userService = services.GetRequiredService<IUserService<string>>();
+        var userService = services.GetRequiredService<IUserService<Guid>>();
         var endpoint_password = userService.GetPasswordLoginEndPoint();
         if (!string.IsNullOrEmpty(endpoint_password))
         {
-            app.MapPost(endpoint_password, async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<string> userService) =>
+            app.MapPost(endpoint_password, async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<Guid> userService) =>
             {
                 try
                 {
@@ -41,7 +41,7 @@ public class DummyUserServiceULID: IUserService<string>
         var endpoint_signout = userService.GetSignOutEndPoint();
         if (!string.IsNullOrEmpty(endpoint_signout))
         {
-            app.MapPost(endpoint_signout, async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<string> userService) =>
+            app.MapPost(endpoint_signout, async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<Guid> userService) =>
             {
                 var _ReturnUrl = ReturnUrl ?? context.Request.Headers.Referer.ToString();
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
@@ -59,7 +59,7 @@ public class DummyUserServiceULID: IUserService<string>
         var endpoint_oauthvalidation = userService.GetOAuthValidationEndPoint();
         if (!string.IsNullOrEmpty(endpoint_oauthvalidation))
         {
-            app.MapPost(endpoint_oauthvalidation, async (IUserService<string> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<string> userService) =>
+            app.MapPost(endpoint_oauthvalidation, async (IUserService<Guid> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<Guid> userService) =>
             {
                 var _ReturnUrl = ReturnUrl;
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
@@ -79,19 +79,19 @@ public class DummyUserServiceULID: IUserService<string>
             }).DisableAntiforgery();
         }
     }
-    private IUser<string>? _currentUser;
-    private readonly IDbContextFactory<MyDBContext<string>> contextFactory;
-    private readonly UserManager<ApplicationUser<string>> userManager;
-    private readonly RoleManager<ApplicationRole<string>> roleManager;
-    private readonly SignInManager<ApplicationUser<string>> signinManager;
+    private IUser<Guid>? _currentUser;
+    private readonly IDbContextFactory<MyDBContext<Guid>> contextFactory;
+    private readonly UserManager<ApplicationUser<Guid>> userManager;
+    private readonly RoleManager<ApplicationRole<Guid>> roleManager;
+    private readonly SignInManager<ApplicationUser<Guid>> signinManager;
     private readonly IAntiforgery antiforgery;
     private readonly IHttpContextAccessor? httpContextAccessor;
     private readonly IConfiguration config;
-    public DummyUserServiceULID(
-        IDbContextFactory<MyDBContext<string>> _contextFactory,
-        UserManager<ApplicationUser<string>> _userManager,
-        RoleManager<ApplicationRole<string>> _roleManager,
-        SignInManager<ApplicationUser<string>> _signinManager,
+    public DummyUserServiceGuid(
+        IDbContextFactory<MyDBContext<Guid>> _contextFactory,
+        UserManager<ApplicationUser<Guid>> _userManager,
+        RoleManager<ApplicationRole<Guid>> _roleManager,
+        SignInManager<ApplicationUser<Guid>> _signinManager,
         IAntiforgery _antiforgery,
         IConfiguration _config,
         IHttpContextAccessor? _httpContextAccessor)
@@ -104,7 +104,7 @@ public class DummyUserServiceULID: IUserService<string>
         httpContextAccessor = _httpContextAccessor;
         config = _config;
     }
-    public IUser<string>? CurrentUser
+    public IUser<Guid>? CurrentUser
     {
         get
         {
@@ -127,10 +127,10 @@ public class DummyUserServiceULID: IUserService<string>
         }
     }
 
-    public async Task CreateUserAsync(IUser<string> user)
+    public async Task CreateUserAsync(IUser<Guid> user)
     {   
         var userId = NewUserId();
-        var _user = new ApplicationUser<string>
+        var _user = new ApplicationUser<Guid>
         {
             Id = userId,
             UserName = user.UserName,
@@ -140,7 +140,7 @@ public class DummyUserServiceULID: IUserService<string>
             ConcurrencyStamp = Guid.NewGuid().ToString("D"),
             SecurityStamp = Guid.NewGuid().ToString("D"),
             Claims = user.GetClaims().Select(i=>
-                new ApplicationUserClaim<string>
+                new ApplicationUserClaim<Guid>
                 {
                     Id = NewUserClaimId(),
                     UserId = userId,
@@ -148,7 +148,7 @@ public class DummyUserServiceULID: IUserService<string>
                     ClaimValue = i.ClaimValue,
                 }).ToList(),
             UserRoles = user.GetRoles().Select(i=>
-            new ApplicationUserRole<string>
+            new ApplicationUserRole<Guid>
             {
                 RoleId = i.Id,
                 UserId = userId,
@@ -159,20 +159,20 @@ public class DummyUserServiceULID: IUserService<string>
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteUserByIdAsync(string id)
+    public async Task DeleteUserByIdAsync(Guid id)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         await context.Users.Where(u => u.Id.Equals(id)).ExecuteDeleteAsync();
     }
 
-    public async Task<ICollection<IRole<string>>> GetAllRolesAsync()
+    public async Task<ICollection<IRole<Guid>>> GetAllRolesAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
         var roles = await context.Roles.AsNoTracking().ToArrayAsync();
         return roles;
     }
 
-    public async Task<ICollection<IUser<string>>> GetAllUsersAsync()
+    public async Task<ICollection<IUser<Guid>>> GetAllUsersAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
         var users = await context.Users.AsNoTracking()
@@ -183,18 +183,18 @@ public class DummyUserServiceULID: IUserService<string>
         return users;
     }
 
-    public async Task<ICollection<IRole<string>>> GetUserRolesAsync(IUser<string> user)
+    public async Task<ICollection<IRole<Guid>>> GetUserRolesAsync(IUser<Guid> user)
     {
         var roles = user.GetRoles();
         return roles;
     }
-    public async Task<IRole<string>?> GetRoleByIdAsync(string id)
+    public async Task<IRole<Guid>?> GetRoleByIdAsync(Guid id)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         return await context.Roles.AsNoTracking().FirstOrDefaultAsync(i => i.Id.Equals(id));
     }
 
-    public async Task<IUser<string>?> GetUserByIdAsync(string id)
+    public async Task<IUser<Guid>?> GetUserByIdAsync(Guid id)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         return await context.Users.AsNoTracking()
@@ -203,7 +203,7 @@ public class DummyUserServiceULID: IUserService<string>
                                     .Include(i => i.Claims)
                                     .FirstOrDefaultAsync(i => i.Id.Equals(id));
     }
-    public async Task<IUser<string>?> GetUserByNameAsync(string UserName)
+    public async Task<IUser<Guid>?> GetUserByNameAsync(string UserName)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         return await context.Users.AsNoTracking()
@@ -213,7 +213,7 @@ public class DummyUserServiceULID: IUserService<string>
                                     .FirstOrDefaultAsync(i => i.UserName == UserName);
     }
 
-    public Task SetPasswordAsync(string id, string Password)
+    public Task SetPasswordAsync(Guid id, string Password)
     {
         throw new NotImplementedException();
     }
@@ -221,7 +221,7 @@ public class DummyUserServiceULID: IUserService<string>
     public async Task SignInAsync(string UserName)
     {
         var user = await GetUserByNameAsync(UserName);
-        var _user = user as ApplicationUser<string>;
+        var _user = user as ApplicationUser<Guid>;
         if (_user == null) throw new Exception("User not found");
         await signinManager.SignInAsync(_user, true);
         _currentUser = user;
@@ -286,7 +286,7 @@ public class DummyUserServiceULID: IUserService<string>
     {
         throw new NotImplementedException();
     }
-    public Task SignOutAsync(IUser<string> user)
+    public Task SignOutAsync(IUser<Guid> user)
     {
         throw new NotImplementedException();
     }
@@ -295,7 +295,7 @@ public class DummyUserServiceULID: IUserService<string>
         await signinManager.SignOutAsync();
     }
 
-    public async Task UpdateUserAsync(IUser<string> user)
+    public async Task UpdateUserAsync(IUser<Guid> user)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         var userInDB = await context.Users.AsTracking()
@@ -317,7 +317,7 @@ public class DummyUserServiceULID: IUserService<string>
         int countRolesRemoved = userInDB.UserRoles.RemoveAll(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
 
         var rolesToAdd = newUserRoles.Where(i => rolesInDB.Any(r => r.RoleId.Equals(i.Id)) == false)
-                                                .Select(i => new ApplicationUserRole<string>
+                                                .Select(i => new ApplicationUserRole<Guid>
                                                 {
                                                     RoleId = i.Id,
                                                     UserId = user.Id
@@ -331,7 +331,7 @@ public class DummyUserServiceULID: IUserService<string>
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
         userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
-                                        .Select(i => new ApplicationUserClaim<string>
+                                        .Select(i => new ApplicationUserClaim<Guid>
                                         {
                                             Id = NewUserClaimId(),
                                             UserId = user.Id,
@@ -348,16 +348,16 @@ public class DummyUserServiceULID: IUserService<string>
         await context.SaveChangesAsync();
     }
 
-    public async Task CreateRoleAsync(IRole<string> role)
+    public async Task CreateRoleAsync(IRole<Guid> role)
     {
-        var _role = role as ApplicationRole<string>;
+        var _role = role as ApplicationRole<Guid>;
         if (_role == null) throw new ArgumentException("Invalid role type");
         _role.Id = NewRoleId();
         _role.ConcurrencyStamp = Guid.NewGuid().ToString("D");
         await roleManager.CreateAsync(_role);
     }
 
-    public async Task UpdateRoleAsync(IRole<string> role)
+    public async Task UpdateRoleAsync(IRole<Guid> role)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         await context.Roles.Where(r => r.Id.Equals(role.Id)).ExecuteUpdateAsync(setters =>
@@ -368,7 +368,7 @@ public class DummyUserServiceULID: IUserService<string>
         );
     }
 
-    public async Task DeleteRoleByIdAsync(string id)
+    public async Task DeleteRoleByIdAsync(Guid id)
     {
         var role = await roleManager.Roles.FirstOrDefaultAsync(i=>i.Id.Equals(id));
         if (role==null) throw new Exception("Role Not Found");
@@ -379,13 +379,13 @@ public class DummyUserServiceULID: IUserService<string>
         }
         await roleManager.DeleteAsync(role);
     }
-    public async Task ChangePasswordAsync(IUser<string> user, string oldPassword, string newPassword)
+    public async Task ChangePasswordAsync(IUser<Guid> user, string oldPassword, string newPassword)
     {
-        var _user = user as ApplicationUser<string>;
+        var _user = user as ApplicationUser<Guid>;
         if (_user == null) throw new ArgumentException("Invalid user type");
         await userManager.ChangePasswordAsync(_user, oldPassword, newPassword);
     }
-    public async Task ResetPasswordAsync(IUser<string> user, string newPassword)
+    public async Task ResetPasswordAsync(IUser<Guid> user, string newPassword)
     {
         var _user = await userManager.FindByNameAsync(user.UserName ?? throw new Exception("User Name is empty"));
         if (_user == null) throw new ArgumentException("Invalid user type");
@@ -436,17 +436,16 @@ public class DummyUserServiceULID: IUserService<string>
         if (httpContext == null) return string.Empty;
         return antiforgery?.GetAndStoreTokens(httpContext).RequestToken ?? string.Empty;
     }
-    
-    public Task<string> NewUserId()
+    public Task<Guid> NewUserId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Task.FromResult(Guid.NewGuid());
     }
-    public Task<string> NewUserClaimId()
+    public Task<Guid> NewUserClaimId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Task.FromResult(Guid.NewGuid());
     }
-    public Task<string> NewRoleId()
+    public Task<Guid> NewRoleId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Task.FromResult(Guid.NewGuid());
     }
 }
