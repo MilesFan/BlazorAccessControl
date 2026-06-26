@@ -36,8 +36,8 @@ namespace BlazorAccessControl.Interface
         public string? GetSignOutEndPoint();
         public string? GetOAuthAuthenticationEndPoint();
         public string? GetOAuthValidationEndPoint();
-        public TKey NewUserId();
-        public TKey NewUserClaimId();
-        public TKey NewRoleId();
+        public Task<TKey> NewUserId();
+        public Task<TKey> NewUserClaimId();
+        public Task<TKey> NewRoleId();
     }
 }
