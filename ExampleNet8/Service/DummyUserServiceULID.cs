@@ -437,16 +437,16 @@ public class DummyUserServiceULID: IUserService<string>
         return antiforgery?.GetAndStoreTokens(httpContext).RequestToken ?? string.Empty;
     }
     
-    public Task<string> NewUserId()
+    public string NewUserId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Ulid.NewUlid().ToString();
     }
-    public Task<string> NewUserClaimId()
+    public string NewUserClaimId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Ulid.NewUlid().ToString();
     }
-    public Task<string> NewRoleId()
+    public string NewRoleId()
     {
-        return Task.FromResult(Ulid.NewUlid().ToString());
+        return Ulid.NewUlid().ToString();
     }
 }

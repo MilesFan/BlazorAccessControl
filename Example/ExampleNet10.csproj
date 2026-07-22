@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="BlazorAccessControl.Interface" Version="1.2.0" />
+	<PackageReference Include="BlazorAccessControl.Interface" Version="1.2.3" />
 	<PackageReference Include="BlazorAccessControl.EFCore" Version="1.1.0" />
     <PackageReference Include="BlazorAccessControl.UI" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
