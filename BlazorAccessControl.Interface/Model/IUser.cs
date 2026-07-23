@@ -14,7 +14,7 @@
         public ICollection<IClaim<TKey>> GetClaims(string? ClaimType = null);
         
         public void SetRoles(ICollection<IRole<TKey>> roles);
-        public void SetClaims(ICollection<IClaim<TKey>> roles);
+        public void SetClaims(ICollection<IClaim<TKey>> claims);
 
         public void UpsertClaim(TKey Id, string ClaimType, string? ClaimValue);
 
