@@ -38,6 +38,7 @@ namespace BlazorAccessControl.Interface
         public string? GetOAuthValidationEndPoint();
         public TKey NewUserId();
         public TKey NewUserClaimId();
+        //public IClaim<TKey> NewUserClaim(string ClaimType, string ClaimValue);
         public TKey NewRoleId();
     }
 }

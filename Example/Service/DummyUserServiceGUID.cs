@@ -448,4 +448,13 @@ public class DummyUserServiceGuid: IUserService<Guid>
     {
         return Guid.NewGuid();
     }
+    //public IClaim<Guid> NewUserClaim(string ClaimType, string ClaimValue)
+    //{
+    //    return new ApplicationUserClaim<Guid>
+    //    {
+    //        Id = Guid.NewGuid(),
+    //        ClaimType = ClaimType,
+    //        ClaimValue = ClaimValue
+    //    };
+    //}
 }

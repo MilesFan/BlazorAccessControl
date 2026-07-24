@@ -14,8 +14,8 @@ namespace ExampleNet10
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging(config.GetValue<bool?>("Database:EnableSensitiveDataLogging") ?? false);
-            //optionsBuilder.UseSqlite(config.GetValue<string>("ConnectionStrings:SQLite"));
-            optionsBuilder.UseSqlServer(config.GetValue<string>("ConnectionStrings:SQLServer"));
+            optionsBuilder.UseSqlite(config.GetValue<string>("ConnectionStrings:SQLite"));
+            //optionsBuilder.UseSqlServer(config.GetValue<string>("ConnectionStrings:SQLServer"));
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -28,13 +28,13 @@ namespace ExampleNet10
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ApplicationUser<TKey>>().ToTable("ApplicationUsers");
-            modelBuilder.Entity<ApplicationRole<TKey>>().ToTable("ApplicationRoles");
-            modelBuilder.Entity<ApplicationUserRole<TKey>>().ToTable("ApplicationUserRoles");
-            modelBuilder.Entity<ApplicationUserClaim<TKey>>().ToTable("ApplicationUserClaims");
-            modelBuilder.Entity<ApplicationRoleClaim<TKey>>().ToTable("ApplicationRoleClaims");
-            modelBuilder.Entity<ApplicationUserLogin<TKey>>().ToTable("ApplicationUserLogins");
-            modelBuilder.Entity<ApplicationUserToken<TKey>>().ToTable("ApplicationUserTokens");
+            //modelBuilder.Entity<ApplicationUser<TKey>>().ToTable("ApplicationUsers");
+            //modelBuilder.Entity<ApplicationRole<TKey>>().ToTable("ApplicationRoles");
+            //modelBuilder.Entity<ApplicationUserRole<TKey>>().ToTable("ApplicationUserRoles");
+            //modelBuilder.Entity<ApplicationUserClaim<TKey>>().ToTable("ApplicationUserClaims");
+            //modelBuilder.Entity<ApplicationRoleClaim<TKey>>().ToTable("ApplicationRoleClaims");
+            //modelBuilder.Entity<ApplicationUserLogin<TKey>>().ToTable("ApplicationUserLogins");
+            //modelBuilder.Entity<ApplicationUserToken<TKey>>().ToTable("ApplicationUserTokens");
 
             //var stringToGuidConverter = new ValueConverter<string, Guid>(
             //    v => Guid.Parse(v),      // string -> Guid (to database)

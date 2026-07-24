@@ -449,4 +449,13 @@ public class DummyUserServiceULID: IUserService<string>
     {
         return Ulid.NewUlid().ToString();
     }
+    public IClaim<string> NewUserClaim(string ClaimType, string ClaimValue)
+    {
+        return new ApplicationUserClaim<string>
+        {
+            Id = Ulid.NewUlid().ToString(),
+            ClaimType = ClaimType,
+            ClaimValue = ClaimValue
+        };
+    }
 }

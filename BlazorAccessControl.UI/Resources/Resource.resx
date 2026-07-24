@@ -201,4 +201,7 @@
   <data name="ChangePassword" xml:space="preserve">
     <value>Change Password</value>
   </data>
+  <data name="Tenant" xml:space="preserve">
+    <value>Tenant</value>
+  </data>
 </root>

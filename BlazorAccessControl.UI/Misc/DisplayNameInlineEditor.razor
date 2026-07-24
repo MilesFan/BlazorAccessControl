@@ -110,7 +110,7 @@
         {
             foreach(var item in DisplayNames)
             {
-                User.UpsertClaim(User.Id, $"DisplayName-{item.LanguageCode}", item.Value);
+                User.UpsertClaim($"DisplayName-{item.LanguageCode}", item.Value);
             }
             await UserChanged.InvokeAsync(User);
         }

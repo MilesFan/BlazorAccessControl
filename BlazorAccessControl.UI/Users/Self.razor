@@ -42,6 +42,8 @@ else
                     <div>@userService.CurrentUser?.UserName</div>
                     <div style="justify-self: end;">@Resource.UserEmail:</div>
                     <div>@userService.CurrentUser?.Email</div>
+                    <div style="justify-self: end;">@Resource.Tenant:</div>
+                    <div>@userService.CurrentUser?.Tenant</div>
                     <div style="justify-self: end; align-self: start;">@Resource.UserRoles:</div>
                     <div class="roles">
                         @foreach (var role in userService.CurrentUser?.GetRoles() ?? [])

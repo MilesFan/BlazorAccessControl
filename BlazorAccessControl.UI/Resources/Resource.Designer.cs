@@ -241,6 +241,15 @@ namespace BlazorAccessControl.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tenant.
+        /// </summary>
+        public static string Tenant {
+            get {
+                return ResourceManager.GetString("Tenant", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
         public static string UserDisplayName {

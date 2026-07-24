@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="BlazorAccessControl.Interface" Version="1.2.3" />
+	<!--<PackageReference Include="BlazorAccessControl.Interface" Version="1.2.3" />
 	<PackageReference Include="BlazorAccessControl.EFCore" Version="1.1.0" />
-    <PackageReference Include="BlazorAccessControl.UI" Version="1.1.0" />
+    <PackageReference Include="BlazorAccessControl.UI" Version="1.1.0" />-->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
@@ -23,6 +23,12 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
     <PackageReference Include="Ulid" Version="1.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorAccessControl.EFCore\BlazorAccessControl.EFCore.csproj" />
+    <ProjectReference Include="..\BlazorAccessControl.Interface\BlazorAccessControl.Interface.csproj" />
+    <ProjectReference Include="..\BlazorAccessControl.UI\BlazorAccessControl.UI.csproj" />
   </ItemGroup>
 
 </Project>

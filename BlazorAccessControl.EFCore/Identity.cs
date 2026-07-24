@@ -29,6 +29,7 @@ namespace BlazorAccessControl.EFCore
                 return displayname?.ClaimValue ?? UserName;
             } 
         }
+
         public virtual List<ApplicationUserClaim<TKey>> Claims { get; set; } = new List<ApplicationUserClaim<TKey>>();
 
         public virtual ICollection<ApplicationUserLogin<TKey>> Logins { get; set; } = new List<ApplicationUserLogin<TKey>>();
@@ -46,7 +47,7 @@ namespace BlazorAccessControl.EFCore
         public void SetClaims(ICollection<IClaim<TKey>> claims) => Claims = claims.Cast<ApplicationUserClaim<TKey>>().ToList();
 
 
-        public void RemoveClaim(string ClaimType)
+        public void RemoveClaims(string ClaimType)
         {
             for(int i = Claims.Count - 1; i >= 0; i--)
             {
@@ -70,10 +71,10 @@ namespace BlazorAccessControl.EFCore
                 .ToList();
         }
 
-        public void UpsertClaim(TKey Id, string ClaimType, string? ClaimValue)
+        public void UpsertClaim(string ClaimType, string? ClaimValue)
         {
             if (string.IsNullOrEmpty(ClaimValue))
-                RemoveClaim(ClaimType);
+                RemoveClaims(ClaimType);
             else
             {
                 var existingClaim = Claims.FirstOrDefault(i => i.ClaimType == ClaimType);
@@ -93,6 +94,20 @@ namespace BlazorAccessControl.EFCore
                         });
                 }
             }
+        }
+
+        public void SetClaimValues(string ClaimType, IReadOnlyCollection<string> Values)
+        {
+            RemoveClaims(ClaimType);
+            var claims = new List<ApplicationUserClaim<TKey>>();
+            foreach(var value in Values)
+            {
+                claims.Add(new ApplicationUserClaim<TKey> {
+                                Id = default!,
+                                ClaimType = ClaimType,
+                                ClaimValue = value});
+            }
+            Claims.AddRange(claims);
         }
     }
 

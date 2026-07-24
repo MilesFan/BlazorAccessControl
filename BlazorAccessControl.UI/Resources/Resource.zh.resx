@@ -201,4 +201,7 @@
   <data name="ChangePassword" xml:space="preserve">
     <value>更改密码</value>
   </data>
+  <data name="Tenant" xml:space="preserve">
+    <value> 租户</value>
+  </data>
 </root>
