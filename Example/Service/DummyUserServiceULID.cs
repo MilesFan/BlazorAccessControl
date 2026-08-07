@@ -434,7 +434,7 @@ public class DummyUserServiceULID: IUserService<string>
     {
         var httpContext = httpContextAccessor?.HttpContext;
         if (httpContext == null) return string.Empty;
-        return antiforgery?.GetAndStoreTokens(httpContext).RequestToken ?? string.Empty;
+        return antiforgery?.GetTokens(httpContext).RequestToken ?? string.Empty;
     }
     public string NewUserId()
     {

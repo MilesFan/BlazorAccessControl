@@ -298,7 +298,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
     public async Task UpdateUserAsync(IUser<Guid> user)
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        var userInDB = await context.Users.AsTracking()
+        var userInDB = await context.Users.AsNoTracking()
                                             .Include(i => i.UserRoles)
                                             .Include(i => i.Claims)
                                             .FirstOrDefaultAsync(i => i.Id.Equals(user.Id));
@@ -329,7 +329,8 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var newUserClaims = user.GetClaims().ToArray();
         var claimsInDB = userInDB.Claims.ToArray();
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
-        userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+        context.UserClaims.RemoveRange(claimsToRemove);
+        //userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
                                         .Select(i => new ApplicationUserClaim<Guid>
                                         {
@@ -339,8 +340,8 @@ public class DummyUserServiceGuid: IUserService<Guid>
                                             ClaimValue = i.ClaimValue
                                         }
                                                 );
-        userInDB.Claims.AddRange(claimsToAdd);
-            
+        //userInDB.Claims.AddRange(claimsToAdd);
+        context.UserClaims.AddRange(claimsToAdd);
         if (countRolesRemoved>0 || countRolesAdded>0)
         {
             userInDB.SecurityStamp = Guid.NewGuid().ToString("D");
@@ -434,7 +435,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
     {
         var httpContext = httpContextAccessor?.HttpContext;
         if (httpContext == null) return string.Empty;
-        return antiforgery?.GetAndStoreTokens(httpContext).RequestToken ?? string.Empty;
+        return antiforgery?.GetTokens(httpContext).RequestToken ?? string.Empty;
     }
     public Guid NewUserId()
     {
