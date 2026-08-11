@@ -4,6 +4,7 @@
 @inject IJSRuntime js
 @inject NavigationManager nav
 @inject IHttpContextAccessor httpContextAccessor
+@inject IConfiguration config
 @inject IUserService<TKey> userService
 <div>
     @if (signinMethod != SignInMethod.UserNamePassword)
