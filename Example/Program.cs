@@ -29,19 +29,27 @@ namespace ExampleNet10
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
                     options =>
                     {
-                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/') ?? "";
-                        options.Cookie.Path = "/" + appBasePath;
-                        options.LoginPath = "/" + appBasePath + "/account/signin";
-                        options.LogoutPath = "/" + appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
-                        options.ForwardSignIn = "/" + appBasePath + "/account/signin";
+                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                        {
+                            appBasePath = "/" + appBasePath;
+                        }
+                        options.Cookie.Path = appBasePath;
+                        options.LoginPath = appBasePath + "/account/signin";
+                        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                        options.ForwardSignIn = appBasePath + "/account/signin";
                     })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(options => {
-                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/') ?? "";
-                        options.Cookie.Path = "/" + appBasePath;
-                        options.LoginPath = "/" + appBasePath + "/account/signin";
-                        options.LogoutPath = "/" + appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
-                        options.AccessDeniedPath = "/" + appBasePath + "/access-denied";
+                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                        {
+                            appBasePath = "/" + appBasePath;
+                        }
+                        options.Cookie.Path = appBasePath;
+                        options.LoginPath = appBasePath + "/account/signin";
+                        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                        options.AccessDeniedPath = appBasePath + "/access-denied";
                     });
                 });
 
@@ -52,10 +60,6 @@ namespace ExampleNet10
                 .AddEntityFrameworkStores<MyDBContext<Guid>>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
-            builder.Services.AddAntiforgery(options =>
-            {
-                options.HeaderName = "X-CSRF-TOKEN";
-            });
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IUserService<Guid>, DummyUserServiceGuid>();
 

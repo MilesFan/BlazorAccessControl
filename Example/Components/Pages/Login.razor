@@ -8,10 +8,13 @@
     <BlazorAccessControl.UI.SigninComponent.SignIn TKey="Guid" />
 </div>
 @code{
+    [SupplyParameterFromQuery]
+    public string? ReturnURl { get; set; }
+
     protected override void OnInitialized()
     {
         if (userService.CurrentUser is not null)
-            nav.NavigateTo("/");
+            nav.NavigateTo(ReturnURl ?? "/");
         base.OnInitialized();
     }
 }
