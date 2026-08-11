@@ -2,20 +2,20 @@
 @using BlazorAccessControl.Interface
 @inject IUserService<Guid> userService
 @inject NavigationManager nav
-<div style="margin: 0 auto; max-width: 800px;">
+<div style="margin: 0 auto; max-width: 600px;">
 
     <h3>Sign In</h3>
     <hr />
     <BlazorAccessControl.UI.SigninComponent.SignIn TKey="Guid" />
 </div>
-@code{
-    protected override void OnAfterRender(bool firstRender)
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnURl { get; set; }
+
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            if (userService.CurrentUser is not null)
-                nav.NavigateTo("/");
-        }
-        base.OnAfterRender(firstRender);
+        if (userService.CurrentUser is not null)
+            nav.NavigateTo(ReturnURl ?? "/");
+        base.OnInitialized();
     }
 }
