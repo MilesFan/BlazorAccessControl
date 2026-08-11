@@ -93,6 +93,7 @@ button {
     padding: 2px 4px;
     border-radius: 4px;
     cursor:pointer;
+    user-select:none;
 }
     .role-item input:checked {
         accent-color: white;
