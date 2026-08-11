@@ -29,29 +29,43 @@ namespace ExampleNet10
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
                     options =>
                     {
-                        options.LoginPath = "/account/signin";
-                        options.LogoutPath = "/account/signout";
-                        options.ForwardSignIn = "/account/signin";
+                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/') ?? "";
+                        options.Cookie.Path = "/" + appBasePath;
+                        options.LoginPath = "/" + appBasePath + "/account/signin";
+                        options.LogoutPath = "/" + appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                        options.ForwardSignIn = "/" + appBasePath + "/account/signin";
                     })
                 .AddIdentityCookies(option => {
-                    option.ApplicationCookie?.Configure(s => {
-                        s.LoginPath = "/account/signin";
-                        s.LogoutPath = "/account/signout";
-                        s.AccessDeniedPath ="/access-denied";
+                    option.ApplicationCookie?.Configure(options => {
+                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/') ?? "";
+                        options.Cookie.Path = "/" + appBasePath;
+                        options.LoginPath = "/" + appBasePath + "/account/signin";
+                        options.LogoutPath = "/" + appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                        options.AccessDeniedPath = "/" + appBasePath + "/access-denied";
                     });
                 });
 
-            builder.Services.AddDbContextFactory<MyDBContext<string>>(lifetime: ServiceLifetime.Transient);
+            builder.Services.AddDbContextFactory<MyDBContext<Guid>>(lifetime: ServiceLifetime.Transient);
 
-            builder.Services.AddIdentityCore<ApplicationUser<string>>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddRoles<ApplicationRole<string>>()
-                .AddEntityFrameworkStores<MyDBContext<string>>()
+            builder.Services.AddIdentityCore<ApplicationUser<Guid>>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<ApplicationRole<Guid>>()
+                .AddEntityFrameworkStores<MyDBContext<Guid>>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-CSRF-TOKEN";
+            });
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<IUserService<string>, DummyUserServiceULID>();
+            builder.Services.AddScoped<IUserService<Guid>, DummyUserServiceGuid>();
 
             var app = builder.Build();
+            //sub-path
+            app.UsePathBase($"/{app.Configuration.GetValue<string>("AppBasePath")}");
+            app.UseAuthorization();
+            app.UseAntiforgery();
+            app.MapBlazorHub("/staging/_blazor");
+            //sub-path
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -64,13 +78,12 @@ namespace ExampleNet10
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
             app.UseHttpsRedirection();
 
-            app.UseAntiforgery();
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-            DummyUserServiceULID.MapLoginUrl(app);
+            DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();
             app.MapGet("/setlanguage", LanguageHelper.SetLanguage);
             //using (var serviceScope = app.Services.CreateScope())

@@ -58,12 +58,7 @@ else
                 {
                     <ResetPasswordDialog TKey="TKey" UserId="@(userService.CurrentUser.Id)" ButtonText="@Resource.ChangePassword" ButtonStyle="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;" />
                 }
-                <div style="display:flex; gap:10px; justify-content:end;">
-                    <form method="post" action="@userService.GetSignOutEndPoint()">
-                        <input type="hidden" name="__RequestVerificationToken" value="@userService.GetAntiForgeryToken()" />
-                        <button type="submit" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">@Resource.SignOut</button>
-                    </form>
-                </div>
+                <button @onclick="SignOut" style="border: 1px solid gray; padding: 0.2rem 0.4rem; border-radius: 6px;">@Resource.SignOut</button>
             </div>
         }
     </dialog>
@@ -78,6 +73,14 @@ else
     private ElementReference dialogRef = default!;
 
     private bool Show;
+
+    private string baseUrl = default!;
+
+    protected override void OnInitialized()
+    {
+        baseUrl = nav.BaseUri.TrimEnd('/');
+        base.OnInitialized();
+    }
 
     public async Task ShowDialog()
     {
@@ -96,5 +99,48 @@ else
     private void Refresh()
     {
         nav.Refresh(true);
+    }
+
+    private static string postScript = @"
+(()=>{
+
+let funcObj = {
+    signout: async function(appid, url, data)
+    {
+        try {
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    formData.append(key, value);
+                }
+            });
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+            let bc = new BroadcastChannel(appid);
+            bc.postMessage('UserLogout');
+            bc.close();
+        } catch (error) {
+            return {Succeeded: false, Message: `Error: ${error.message}`}
+            console.error('Error:', error);
+        }
+    }
+};
+return funcObj;
+})()";
+    public async Task SignOut()
+    {
+        try
+        {
+            await using var scriptObj = await js.InvokeAsync<IJSObjectReference>("eval", postScript);
+            var url = nav.BaseUri.TrimEnd('/') + userService.GetSignOutEndPoint();
+            var data = new { ReturnUrl = nav.Uri.ToString() };
+            await scriptObj.InvokeVoidAsync("signout", nav.BaseUri, url, data);
+        }
+        catch (Exception ex)
+        {
+            await js.InvokeVoidAsync("alert", ex.Message);
+        }
     }
 }

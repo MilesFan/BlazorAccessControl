@@ -6,9 +6,9 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "BlazorAccessControl.EFCore/1.2.3": {
+      "BlazorAccessControl.EFCore/1.2.6": {
         "dependencies": {
-          "BlazorAccessControl.Interface": "1.2.4",
+          "BlazorAccessControl.Interface": "1.2.6",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "9.0.16",
           "Microsoft.EntityFrameworkCore": "9.0.16"
         },
@@ -208,18 +208,18 @@
           }
         }
       },
-      "BlazorAccessControl.Interface/1.2.4": {
+      "BlazorAccessControl.Interface/1.2.6": {
         "runtime": {
           "BlazorAccessControl.Interface.dll": {
-            "assemblyVersion": "1.2.4.0",
-            "fileVersion": "1.2.4.0"
+            "assemblyVersion": "1.2.6.0",
+            "fileVersion": "1.2.6.0"
           }
         }
       }
     }
   },
   "libraries": {
-    "BlazorAccessControl.EFCore/1.2.3": {
+    "BlazorAccessControl.EFCore/1.2.6": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -343,7 +343,7 @@
       "path": "microsoft.extensions.primitives/9.0.16",
       "hashPath": "microsoft.extensions.primitives.9.0.16.nupkg.sha512"
     },
-    "BlazorAccessControl.Interface/1.2.4": {
+    "BlazorAccessControl.Interface/1.2.6": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -25,9 +25,9 @@
     @if (signinMethod == SignInMethod.UserNamePassword)
     {
 
-        <form method="post" action="@userService.GetPasswordLoginEndPoint()">
+        <form method="post" >
             <input type="hidden" name="__RequestVerificationToken" value="@antiforgeryToken" />
-            <input type="hidden" name="ReturnUrl" value="/" />
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
             <div style="display:flex; flex-direction:column; max-width: 300px; gap:20px;">
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div style="display:flex; flex-direction:column; flex-wrap:nowrap; --padding: 4px; ">
@@ -158,15 +158,19 @@ return funcObj;
             };
             Password = string.Empty;
             var scriptObj = await js.InvokeAsync<IJSObjectReference>("eval", postScript);
-            loginResult = await scriptObj.InvokeAsync<LoginResult>("postData", userService.GetPasswordLoginEndPoint(), data);
+            var url = nav.BaseUri.TrimEnd('/') + userService.GetPasswordLoginEndPoint();
+            loginResult = await scriptObj.InvokeAsync<LoginResult>("postData", url, data);
             if (loginResult.Succeeded)
             {
                 if (OnAuthenticationStateChange.HasDelegate)
                     await OnAuthenticationStateChange.InvokeAsync();
-                if (ReturnUrl is not null)
-                    nav.NavigateTo(ReturnUrl, true);
-                else if (OnAuthenticationStateChange.HasDelegate == false)
-                    nav.NavigateTo("/", true);
+                else
+                    nav.NavigateTo(nav.Uri, true);
+                // nav.NavigateTo(nav.Uri, true);
+                // if (ReturnUrl is not null)
+                //     nav.NavigateTo(ReturnUrl, true);
+                // else if (OnAuthenticationStateChange.HasDelegate == false)
+                //     nav.NavigateTo("/", true);
             }
         }
         catch (Exception ex)
@@ -183,6 +187,10 @@ return funcObj;
     protected override void OnInitialized()
     {
         antiforgeryToken = userService.GetAntiForgeryToken();
+        if (string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            ReturnUrl = nav.BaseUri;
+        }
         OAuthReturnURL = nav.BaseUri.TrimEnd('/') + userService.GetOAuthValidationEndPoint() + "?returnurl=" + System.Web.HttpUtility.UrlEncode(ReturnUrl);
     }
     private void toggleReviewPasswrod()

@@ -3,7 +3,6 @@
 @inject IJSRuntime js
 @implements IAsyncDisposable
 @inject NavigationManager nav
-<button @onclick="Test">Test</button>
 @code {
     private IJSObjectReference? guard;
     private async Task SetUp()
@@ -17,8 +16,18 @@
     guard.SetupLogoutListener = function (appid) {
         this.bc_loginguard = new BroadcastChannel(appid);
         this.appid = appid;
-        this.bc_loginguard.onmessage = function (ev) {
-            if (ev.data == 'UserLogout') window.location.href = 'about:blank';
+        this.bc_loginguard.onmessage = async function (ev) {
+            if (ev.data == 'UserLogout')
+            {
+                try
+                {
+                    window.location.reload();
+                }
+                catch(msg)
+                {
+                    console.error(msg);
+                }
+            }
         }
     }
     guard.NotifyLogout = function () {
@@ -34,14 +43,14 @@
                 guard = await js.InvokeAsync<IJSObjectReference>("eval", s);
                 if (guard == null)
                 {
-                    await js.InvokeVoidAsync("alert", "Code Editor Initialization Error.");
+                    await js.InvokeVoidAsync("console.error", "login guard Initialization Error.");
                     return;
                 }
                 await guard.InvokeVoidAsync("SetupLogoutListener", nav.BaseUri);
             }
             catch (Exception)
             {
-                await js.InvokeVoidAsync("alert", "Code Editor Initialization Error.");
+                await js.InvokeVoidAsync("console.error", "login guard Initialization Error.");
             }
         }
     }
@@ -54,24 +63,13 @@
     }
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (guard is null) return;
-        try
+        if (guard is not null)
         {
-            await guard.DisposeAsync();
-        }
-        catch(Exception) {}
-    }
-
-    public async Task Test()
-    {
-        try
-        {
-            if (guard is null) throw new Exception("Guard is null");
-            await guard.InvokeVoidAsync("NotifyLogout");
-        }
-        catch(Exception ex)
-        {
-            await js.InvokeVoidAsync("alert", ex.Message);
+            try
+            {
+                await guard.DisposeAsync();
+            }
+            catch (Exception) { }
         }
     }
 }

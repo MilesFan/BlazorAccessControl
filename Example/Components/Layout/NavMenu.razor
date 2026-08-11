@@ -1,5 +1,5 @@
 ﻿@using BlazorAccessControl.Interface
-@inject IUserService<string> userService
+@inject IUserService<Guid> userService
 @inject NavigationManager nav
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -29,7 +29,7 @@
             </div>
         }
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="./" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
@@ -54,11 +54,11 @@
         </div>
     </nav>
 </div>
-<BlazorAccessControl.UI.Users.Self TKey="string" @ref="self" />
+<BlazorAccessControl.UI.Users.Self TKey="Guid" @ref="self" />
 
 @code
 {
-    private BlazorAccessControl.UI.Users.Self<string> self = default!;
+    private BlazorAccessControl.UI.Users.Self<Guid> self = default!;
     private BlazorAccessControl.UI.Misc.LanguageSelector languageSelector = default!;
     private void setEN()
     {

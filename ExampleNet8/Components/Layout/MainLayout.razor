@@ -1,5 +1,6 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using BlazorAccessControl.UI.SigninComponent
+@inherits LayoutComponentBase
+<LoginGuard TKey="Guid" />
 <div class="page">
     <div class="sidebar">
         <NavMenu />

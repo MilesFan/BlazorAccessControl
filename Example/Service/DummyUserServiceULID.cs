@@ -21,11 +21,12 @@ public class DummyUserServiceULID: IUserService<string>
     {
         using var serviceScope = app.Services.CreateScope();
         var services = serviceScope.ServiceProvider;
-        var userService = services.GetRequiredService<IUserService<string>>();
+        var userService = services.GetRequiredService<IUserService<Guid>>();
         var endpoint_password = userService.GetPasswordLoginEndPoint();
+        var pathBase = app.Configuration.GetValue<string>("AppBasePath")?.TrimEnd('/') ?? "";
         if (!string.IsNullOrEmpty(endpoint_password))
         {
-            app.MapPost(endpoint_password, async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<string> userService) =>
+            app.MapPost($"{pathBase}{endpoint_password}", async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<Guid> userService) =>
             {
                 try
                 {
@@ -41,7 +42,7 @@ public class DummyUserServiceULID: IUserService<string>
         var endpoint_signout = userService.GetSignOutEndPoint();
         if (!string.IsNullOrEmpty(endpoint_signout))
         {
-            app.MapPost(endpoint_signout, async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<string> userService) =>
+            app.MapPost($"{pathBase}{endpoint_signout}", async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<Guid> userService) =>
             {
                 var _ReturnUrl = ReturnUrl ?? context.Request.Headers.Referer.ToString();
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
@@ -59,7 +60,7 @@ public class DummyUserServiceULID: IUserService<string>
         var endpoint_oauthvalidation = userService.GetOAuthValidationEndPoint();
         if (!string.IsNullOrEmpty(endpoint_oauthvalidation))
         {
-            app.MapPost(endpoint_oauthvalidation, async (IUserService<string> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<string> userService) =>
+            app.MapPost($"{pathBase}{endpoint_oauthvalidation}", async (IUserService<Guid> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<Guid> userService) =>
             {
                 var _ReturnUrl = ReturnUrl;
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
