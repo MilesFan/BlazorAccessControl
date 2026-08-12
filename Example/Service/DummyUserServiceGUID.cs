@@ -299,7 +299,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
     public async Task UpdateUserAsync(IUser<Guid> user)
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        var userInDB = await context.Users.AsNoTracking()
+        var userInDB = await context.Users.AsTracking()
                                             .Include(i => i.UserRoles)
                                             .Include(i => i.Claims)
                                             .FirstOrDefaultAsync(i => i.Id.Equals(user.Id));
@@ -330,8 +330,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var newUserClaims = user.GetClaims().ToArray();
         var claimsInDB = userInDB.Claims.ToArray();
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
-        context.UserClaims.RemoveRange(claimsToRemove);
-        //userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+        userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
                                         .Select(i => new ApplicationUserClaim<Guid>
                                         {
@@ -341,8 +340,8 @@ public class DummyUserServiceGuid: IUserService<Guid>
                                             ClaimValue = i.ClaimValue
                                         }
                                                 );
-        //userInDB.Claims.AddRange(claimsToAdd);
-        context.UserClaims.AddRange(claimsToAdd);
+        userInDB.Claims.AddRange(claimsToAdd);
+            
         if (countRolesRemoved>0 || countRolesAdded>0)
         {
             userInDB.SecurityStamp = Guid.NewGuid().ToString("D");
@@ -450,13 +449,13 @@ public class DummyUserServiceGuid: IUserService<Guid>
     {
         return Guid.NewGuid();
     }
-    //public IClaim<Guid> NewUserClaim(string ClaimType, string ClaimValue)
-    //{
-    //    return new ApplicationUserClaim<Guid>
-    //    {
-    //        Id = Guid.NewGuid(),
-    //        ClaimType = ClaimType,
-    //        ClaimValue = ClaimValue
-    //    };
-    //}
+    public IClaim<Guid> NewUserClaim(string ClaimType, string ClaimValue)
+    {
+        return new ApplicationUserClaim<Guid>
+        {
+            Id = Guid.NewGuid(),
+            ClaimType = ClaimType,
+            ClaimValue = ClaimValue
+        };
+    }
 }
