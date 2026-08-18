@@ -26,19 +26,20 @@ namespace ExampleNet10
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
                     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
                 })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-                    options =>
-                    {
-                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
-                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
-                        {
-                            appBasePath = "/" + appBasePath;
-                        }
-                        options.Cookie.Path = appBasePath;
-                        options.LoginPath = appBasePath + "/account/signin";
-                        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
-                        options.ForwardSignIn = appBasePath + "/account/signin";
-                    })
+                //.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                //    options =>
+                //    {
+                //        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                //        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                //        {
+                //            appBasePath = "/" + appBasePath;
+                //        }
+                //        options.Cookie.Name = $".AspNetCore.Identity.Application{typeof(App).Namespace}";
+                //        //options.Cookie.Path = appBasePath;
+                //        options.LoginPath = appBasePath + "/account/signin";
+                //        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                //        options.ForwardSignIn = appBasePath + "/account/signin";
+                //    })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(options => {
                         var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
@@ -46,7 +47,8 @@ namespace ExampleNet10
                         {
                             appBasePath = "/" + appBasePath;
                         }
-                        options.Cookie.Path = appBasePath;
+                        options.Cookie.Name = $".AspNetCore.Identity.Application{typeof(App).Namespace}";
+                        //options.Cookie.Path = appBasePath;
                         options.LoginPath = appBasePath + "/account/signin";
                         options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
                         options.AccessDeniedPath = appBasePath + "/access-denied";
@@ -65,10 +67,10 @@ namespace ExampleNet10
 
             var app = builder.Build();
             //sub-path
-            app.UsePathBase($"/{app.Configuration.GetValue<string>("AppBasePath")}");
+            //app.UsePathBase($"/{app.Configuration.GetValue<string>("AppBasePath")}");
             app.UseAuthorization();
             app.UseAntiforgery();
-            app.MapBlazorHub("/staging/_blazor");
+            //app.MapBlazorHub("/staging/_blazor");
             //sub-path
 
             // Configure the HTTP request pipeline.
@@ -85,7 +87,7 @@ namespace ExampleNet10
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
+                .AddInteractiveServerRenderMode(o=>o.DisableWebSocketCompression = true);
 
             DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();
@@ -96,6 +98,7 @@ namespace ExampleNet10
             //    var userService = services.GetRequiredService<IUserService>();
             //    app.MapGet("/login_password", userService.PasswordSignIn );
             //}
+            app.UseRewriter();
             app.Run();
         }
     }

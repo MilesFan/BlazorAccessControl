@@ -25,19 +25,19 @@ namespace ExampleNet8
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
                     options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
                 })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-                    options =>
-                    {
-                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
-                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
-                        {
-                            appBasePath = "/" + appBasePath;
-                        }
-                        options.Cookie.Path = appBasePath;
-                        options.LoginPath = appBasePath + "/account/signin";
-                        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
-                        options.ForwardSignIn = appBasePath + "/account/signin";
-                    })
+                //.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                //    options =>
+                //    {
+                //        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                //        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                //        {
+                //            appBasePath = "/" + appBasePath;
+                //        }
+                //        options.Cookie.Path = appBasePath;
+                //        options.LoginPath = appBasePath + "/account/signin";
+                //        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                //        options.ForwardSignIn = appBasePath + "/account/signin";
+                //    })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(options => {
                         var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
@@ -45,7 +45,7 @@ namespace ExampleNet8
                         {
                             appBasePath = "/" + appBasePath;
                         }
-                        options.Cookie.Path = appBasePath;
+                        //options.Cookie.Path = appBasePath;
                         options.LoginPath = appBasePath + "/account/signin";
                         options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
                         options.AccessDeniedPath = appBasePath + "/access-denied";
