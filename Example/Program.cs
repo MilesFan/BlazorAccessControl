@@ -93,7 +93,7 @@ namespace ExampleNet10
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode(o=>o.DisableWebSocketCompression = false);
+                .AddInteractiveServerRenderMode(o=>o.DisableWebSocketCompression = true);
 
             DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();
