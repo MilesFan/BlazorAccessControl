@@ -62,6 +62,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
         {
             app.MapPost($"{endpoint_oauthvalidation}", async (IUserService<Guid> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<Guid> userService) =>
             {
+                //return Results.Ok(ReturnUrl);
                 var _ReturnUrl = ReturnUrl;
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
                 if (string.IsNullOrWhiteSpace(__jwt_token))

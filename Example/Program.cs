@@ -3,6 +3,7 @@ using BlazorAccessControl.Interface;
 using ExampleNet10.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,16 +43,21 @@ namespace ExampleNet10
                 //    })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(options => {
-                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
-                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
-                        {
-                            appBasePath = "/" + appBasePath;
-                        }
-                        options.Cookie.Name = $".AspNetCore.Identity.Application{typeof(App).Namespace}";
+                        //var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                        //if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                        //{
+                        //    appBasePath = "/" + appBasePath;
+                        //}
+                        options.Cookie.Name = $".AspNetCore.Identity.Application{typeof(Program).Namespace}";
                         //options.Cookie.Path = appBasePath;
-                        options.LoginPath = appBasePath + "/account/signin";
-                        options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
-                        options.AccessDeniedPath = appBasePath + "/access-denied";
+                        options.LoginPath = "/account/signin"; //route of Login.razor
+                        //options.Events.OnRedirectToLogin = context =>
+                        //{
+                        //    context.Response.Redirect(appBasePath + "/account/signin?returnurl=" + context.Request.GetEncodedUrl());
+                        //    return Task.CompletedTask;
+                        //};
+                        //options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
+                        options.AccessDeniedPath = "/access-denied";
                     });
                 });
 
@@ -87,7 +93,7 @@ namespace ExampleNet10
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode(o=>o.DisableWebSocketCompression = true);
+                .AddInteractiveServerRenderMode(o=>o.DisableWebSocketCompression = false);
 
             DummyUserServiceGuid.MapLoginUrl(app);
             app.SetRequestLocalization();

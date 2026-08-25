@@ -48,7 +48,7 @@ public static class LanguageHelper
                         Expires = DateTimeOffset.UtcNow.AddYears(1),
                         IsEssential = true,
                         HttpOnly = false,
-                        SameSite = SameSiteMode.None,
+                        SameSite = SameSiteMode.Lax,
                         Secure = true
                     }
                 );

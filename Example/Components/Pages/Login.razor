@@ -1,12 +1,11 @@
 ﻿@page "/account/signin"
 @inject IUserService<Guid> userService
 @inject NavigationManager nav
-<div style="margin: 0 auto; max-width: 600px;">
-
-    <h3>Sign In</h3>
-    <hr />
+<div style="display:flex; flex-direction: column; margin: auto; max-width: 400px;">
+    <div style="background-color:orange; color: black; border-radius: 6px; padding: 8px; width: 100%; margin-bottom: 20px;">🔒 Sign-In is required to view this page.</div>
     <BlazorAccessControl.UI.SigninComponent.SignIn TKey="Guid" />
 </div>
+
 @code{
     [SupplyParameterFromQuery]
     public string? ReturnURl { get; set; }
