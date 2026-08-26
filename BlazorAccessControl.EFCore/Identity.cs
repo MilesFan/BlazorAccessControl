@@ -1,23 +1,12 @@
 using BlazorAccessControl.Interface;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Claims;
-using System.Xml.Linq;
 
 namespace BlazorAccessControl.EFCore
 {
 
     public class ApplicationUser<TKey>: IdentityUser<TKey>, IUser<TKey> where TKey:System.IEquatable<TKey>
     {
-        //public ApplicationUser()
-        //{
-        //    Id = NewId();
-        //    SecurityStamp = Ulid.NewUlid().ToString();
-        //    ConcurrencyStamp = Ulid.NewUlid().ToString();
-        //    UserName = string.Empty;
-
-        //}
         public string? DisplayName {
             get
             {
@@ -113,10 +102,6 @@ namespace BlazorAccessControl.EFCore
 
     public class ApplicationRole<TKey>: IdentityRole<TKey>, IRole<TKey> where TKey:System.IEquatable<TKey>
     {
-        //public ApplicationRole()
-        //{
-        //    Id = Ulid.NewUlid().ToString();
-        //}
         public virtual ICollection<ApplicationUserRole<TKey>> UserRoles { get; set; } = new List<ApplicationUserRole<TKey>>();
         public virtual ICollection<ApplicationRoleClaim<TKey>> RoleClaims { get; set; } = new List<ApplicationRoleClaim<TKey>>();
     }
@@ -129,9 +114,6 @@ namespace BlazorAccessControl.EFCore
 
     public class ApplicationUserClaim<TKey> : IdentityUserClaim<TKey>, IClaim<TKey> where TKey:System.IEquatable<TKey>
     {
-        //[Key, StringLength(26)]
-        //public new string Id { get; set;} = Ulid.NewUlid().ToString();
-
         [Key, StringLength(40)]
         public new required TKey Id { get; set;}
         public virtual ApplicationUser<TKey> User { get; set; } = default!;
@@ -144,8 +126,6 @@ namespace BlazorAccessControl.EFCore
 
     public class ApplicationRoleClaim<TKey> : IdentityRoleClaim<TKey> where TKey:System.IEquatable<TKey>
     {
-        //[Key, StringLength(26)]
-        //public new TKey Id { get; set;} = Ulid.NewUlid().ToString();
         public virtual ApplicationRole<TKey> Role { get; set; } = default!;
     }
 
