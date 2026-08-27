@@ -55,7 +55,7 @@ public class DummyUserServiceULID: IUserService<string>
                     Console.WriteLine(ex.ToString());
                 }
                 return Results.Redirect(_ReturnUrl);
-            });
+            }).DisableAntiforgery();
         }
         var endpoint_oauthvalidation = userService.GetOAuthValidationEndPoint();
         if (!string.IsNullOrEmpty(endpoint_oauthvalidation))
@@ -315,7 +315,9 @@ public class DummyUserServiceULID: IUserService<string>
         var newUserRoles = user.GetRoles().ToArray();
         var rolesInDB = userInDB.UserRoles.ToArray();
 
-        int countRolesRemoved = userInDB.UserRoles.RemoveAll(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        var rolesToRemove = userInDB.UserRoles.Where(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        int countRolesRemoved = rolesToRemove.Count();
+        context.UserRoles.RemoveRange(rolesToRemove);
 
         var rolesToAdd = newUserRoles.Where(i => rolesInDB.Any(r => r.RoleId.Equals(i.Id)) == false)
                                                 .Select(i => new ApplicationUserRole<string>
@@ -325,12 +327,12 @@ public class DummyUserServiceULID: IUserService<string>
                                                 }
                                             );
         int countRolesAdded = rolesToAdd.Count();
-        userInDB.UserRoles.AddRange(rolesToAdd);
+        context.UserRoles.AddRange(rolesToAdd);
 
         var newUserClaims = user.GetClaims().ToArray();
         var claimsInDB = userInDB.Claims.ToArray();
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
-        userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+        context.UserClaims.RemoveRange(claimsToRemove);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
                                         .Select(i => new ApplicationUserClaim<string>
                                         {
@@ -340,7 +342,7 @@ public class DummyUserServiceULID: IUserService<string>
                                             ClaimValue = i.ClaimValue
                                         }
                                                 );
-        userInDB.Claims.AddRange(claimsToAdd);
+        context.UserClaims.AddRange(claimsToAdd);
             
         if (countRolesRemoved>0 || countRolesAdded>0)
         {
@@ -437,6 +439,7 @@ public class DummyUserServiceULID: IUserService<string>
         if (httpContext == null) return string.Empty;
         return antiforgery?.GetTokens(httpContext).RequestToken ?? string.Empty;
     }
+    
     public string NewUserId()
     {
         return Ulid.NewUlid().ToString();
@@ -449,13 +452,13 @@ public class DummyUserServiceULID: IUserService<string>
     {
         return Ulid.NewUlid().ToString();
     }
-    //public IClaim<string> NewUserClaim(string ClaimType, string ClaimValue)
-    //{
-    //    return new ApplicationUserClaim<string>
-    //    {
-    //        Id = Ulid.NewUlid().ToString(),
-    //        ClaimType = ClaimType,
-    //        ClaimValue = ClaimValue
-    //    };
-    //}
+    public IClaim<string> NewUserClaim(string ClaimType, string ClaimValue)
+    {
+        return new ApplicationUserClaim<string>
+        {
+            Id = Ulid.NewUlid().ToString(),
+            ClaimType = ClaimType,
+            ClaimValue = ClaimValue
+        };
+    }
 }

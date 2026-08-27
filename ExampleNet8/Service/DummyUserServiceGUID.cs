@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class DummyUserServiceGuid: IUserService<Guid>
 {
@@ -23,10 +25,10 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var services = serviceScope.ServiceProvider;
         var userService = services.GetRequiredService<IUserService<Guid>>();
         var endpoint_password = userService.GetPasswordLoginEndPoint();
-        var pathBase = app.Configuration.GetValue<string>("AppBasePath")?.TrimEnd('/') ?? "";
+        //var pathBase = app.Configuration.GetValue<string>("AppBasePath")?.TrimEnd('/') ?? "";
         if (!string.IsNullOrEmpty(endpoint_password))
         {
-            app.MapPost($"{pathBase}{endpoint_password}", async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<Guid> userService) =>
+            app.MapPost($"{endpoint_password}", async (HttpContext context, [FromForm] string UserName, [FromForm] string Password, [FromServices] IUserService<Guid> userService) =>
             {
                 try
                 {
@@ -42,7 +44,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var endpoint_signout = userService.GetSignOutEndPoint();
         if (!string.IsNullOrEmpty(endpoint_signout))
         {
-            app.MapPost($"{pathBase}{endpoint_signout}", async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<Guid> userService) =>
+            app.MapPost($"{endpoint_signout}", async (HttpContext context, [FromForm] string? ReturnUrl, [FromServices] IUserService<Guid> userService) =>
             {
                 var _ReturnUrl = ReturnUrl ?? context.Request.Headers.Referer.ToString();
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
@@ -60,8 +62,9 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var endpoint_oauthvalidation = userService.GetOAuthValidationEndPoint();
         if (!string.IsNullOrEmpty(endpoint_oauthvalidation))
         {
-            app.MapPost($"{pathBase}{endpoint_oauthvalidation}", async (IUserService<Guid> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<Guid> userService) =>
+            app.MapPost($"{endpoint_oauthvalidation}", async (IUserService<Guid> _userService, IConfiguration _config, HttpContext context, [FromQuery] string? ReturnUrl, [FromForm] string __jwt_token, [FromServices] IUserService<Guid> userService) =>
             {
+                //return Results.Ok(ReturnUrl);
                 var _ReturnUrl = ReturnUrl;
                 if (string.IsNullOrEmpty(_ReturnUrl)) _ReturnUrl = "/";
                 if (string.IsNullOrWhiteSpace(__jwt_token))
@@ -127,7 +130,31 @@ public class DummyUserServiceGuid: IUserService<Guid>
             }
         }
     }
-
+    private async Task PatchUpdateTRDataLegacy<TKey>(DbContext context, TKey UserId)
+    {
+        string tsql=$@"
+        UPDATE [dbo].[ApplicationUsers] 
+           SET [DisplayName] = ISNULL(B.ClaimValue, UserName)
+        FROM [dbo].[ApplicationUsers] AS A
+        LEFT OUTER JOIN [dbo].[ApplicationUserClaims] AS B
+	        ON A.Id=B.UserId AND B.ClaimType='DisplayName-zh-Hans'
+         WHERE A.Id='{UserId!.ToString()}';
+ 
+        UPDATE [dbo].[ApplicationUsers] 
+           SET [DisplayNameInternational] = ISNULL(C.ClaimValue, UserName)
+        FROM [dbo].[ApplicationUsers] AS A
+        LEFT OUTER JOIN [dbo].[ApplicationUserClaims] AS C
+	        ON A.Id=C.UserId AND C.ClaimType='DisplayName-en'
+         WHERE A.Id='{UserId!.ToString()}';
+ 
+        UPDATE [dbo].[ApplicationUsers] 
+           SET [Tenants] = D.ClaimValue
+        FROM [dbo].[ApplicationUsers] AS A
+        LEFT OUTER JOIN [dbo].[ApplicationUserClaims] AS D
+	        ON A.Id=D.UserId AND D.ClaimType='MainTenant'
+         WHERE A.Id='{UserId!.ToString()}';";
+        await context.Database.ExecuteSqlRawAsync(tsql);
+    }
     public async Task CreateUserAsync(IUser<Guid> user)
     {   
         var userId = NewUserId();
@@ -158,6 +185,7 @@ public class DummyUserServiceGuid: IUserService<Guid>
         using var context = await contextFactory.CreateDbContextAsync();
         await context.Users.AddAsync(_user);
         await context.SaveChangesAsync();
+        await PatchUpdateTRDataLegacy(context, _user.Id);
     }
 
     public async Task DeleteUserByIdAsync(Guid id)
@@ -315,7 +343,9 @@ public class DummyUserServiceGuid: IUserService<Guid>
         var newUserRoles = user.GetRoles().ToArray();
         var rolesInDB = userInDB.UserRoles.ToArray();
 
-        int countRolesRemoved = userInDB.UserRoles.RemoveAll(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        var rolesToRemove = userInDB.UserRoles.Where(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        int countRolesRemoved = rolesToRemove.Count();
+        context.UserRoles.RemoveRange(rolesToRemove);
 
         var rolesToAdd = newUserRoles.Where(i => rolesInDB.Any(r => r.RoleId.Equals(i.Id)) == false)
                                                 .Select(i => new ApplicationUserRole<Guid>
@@ -325,12 +355,12 @@ public class DummyUserServiceGuid: IUserService<Guid>
                                                 }
                                             );
         int countRolesAdded = rolesToAdd.Count();
-        userInDB.UserRoles.AddRange(rolesToAdd);
+        context.UserRoles.AddRange(rolesToAdd);
 
         var newUserClaims = user.GetClaims().ToArray();
         var claimsInDB = userInDB.Claims.ToArray();
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
-        userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+        context.UserClaims.RemoveRange(claimsToRemove);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
                                         .Select(i => new ApplicationUserClaim<Guid>
                                         {
@@ -340,13 +370,15 @@ public class DummyUserServiceGuid: IUserService<Guid>
                                             ClaimValue = i.ClaimValue
                                         }
                                                 );
-        userInDB.Claims.AddRange(claimsToAdd);
+
+        context.UserClaims.AddRange(claimsToAdd);
             
         if (countRolesRemoved>0 || countRolesAdded>0)
         {
             userInDB.SecurityStamp = Guid.NewGuid().ToString("D");
         }
         await context.SaveChangesAsync();
+        await PatchUpdateTRDataLegacy(context, userInDB.Id);
     }
 
     public async Task CreateRoleAsync(IRole<Guid> role)

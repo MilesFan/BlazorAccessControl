@@ -315,7 +315,9 @@ public class DummyUserServiceULID: IUserService<string>
         var newUserRoles = user.GetRoles().ToArray();
         var rolesInDB = userInDB.UserRoles.ToArray();
 
-        int countRolesRemoved = userInDB.UserRoles.RemoveAll(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        var rolesToRemove = userInDB.UserRoles.Where(i => newUserRoles.Any(r => r.Id.Equals(i.RoleId)) == false);
+        int countRolesRemoved = rolesToRemove.Count();
+        context.UserRoles.RemoveRange(rolesToRemove);
 
         var rolesToAdd = newUserRoles.Where(i => rolesInDB.Any(r => r.RoleId.Equals(i.Id)) == false)
                                                 .Select(i => new ApplicationUserRole<string>
@@ -325,12 +327,12 @@ public class DummyUserServiceULID: IUserService<string>
                                                 }
                                             );
         int countRolesAdded = rolesToAdd.Count();
-        userInDB.UserRoles.AddRange(rolesToAdd);
+        context.UserRoles.AddRange(rolesToAdd);
 
         var newUserClaims = user.GetClaims().ToArray();
         var claimsInDB = userInDB.Claims.ToArray();
         var claimsToRemove = userInDB.Claims.Where(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
-        userInDB.Claims.RemoveAll(i => newUserClaims.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false);
+        context.UserClaims.RemoveRange(claimsToRemove);
         var claimsToAdd = newUserClaims.Where(i => claimsInDB.Any(r => r.ClaimType == i.ClaimType && r.ClaimValue == i.ClaimValue) == false)
                                         .Select(i => new ApplicationUserClaim<string>
                                         {
@@ -340,7 +342,7 @@ public class DummyUserServiceULID: IUserService<string>
                                             ClaimValue = i.ClaimValue
                                         }
                                                 );
-        userInDB.Claims.AddRange(claimsToAdd);
+        context.UserClaims.AddRange(claimsToAdd);
             
         if (countRolesRemoved>0 || countRolesAdded>0)
         {
