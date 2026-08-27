@@ -43,19 +43,18 @@ namespace ExampleNet10
                 //    })
                 .AddIdentityCookies(option => {
                     option.ApplicationCookie?.Configure(options => {
-                        //var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
-                        //if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
-                        //{
-                        //    appBasePath = "/" + appBasePath;
-                        //}
+                        var appBasePath = builder.Configuration.GetSection("AppBasePath").Value?.TrimEnd('/');
+                        if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                        {
+                            appBasePath = "/" + appBasePath;
+                        }
                         options.Cookie.Name = $".AspNetCore.Identity.Application{typeof(Program).Namespace}";
                         //options.Cookie.Path = appBasePath;
-                        options.LoginPath = "/account/signin"; //route of Login.razor
-                        //options.Events.OnRedirectToLogin = context =>
-                        //{
-                        //    context.Response.Redirect(appBasePath + "/account/signin?returnurl=" + context.Request.GetEncodedUrl());
-                        //    return Task.CompletedTask;
-                        //};
+                        //options.LoginPath = "/account/signin"; //route of Login.razor
+                        options.Events.OnRedirectToLogin = async(context) =>
+                        {
+                            context.Response.Redirect(appBasePath + "/account/signin");
+                        };
                         //options.LogoutPath = appBasePath + builder.Configuration.GetSection("Authentication:EndPoint_Signout").Value ?? "/account/signout";
                         options.AccessDeniedPath = "/access-denied";
                     });

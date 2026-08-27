@@ -1,6 +1,9 @@
 ﻿@page "/account/signin"
 @inject IUserService<Guid> userService
 @inject NavigationManager nav
+@inject IConfiguration config
+userService.CurrentUser = @(userService.CurrentUser)
+User Name = @(userService.CurrentUser?.UserName)
 <div style="display:flex; flex-direction: column; margin: auto; max-width: 400px;">
     <div style="background-color:orange; color: black; border-radius: 6px; padding: 8px; width: 100%; margin-bottom: 20px;">🔒 Sign-In is required to view this page.</div>
     <BlazorAccessControl.UI.SigninComponent.SignIn TKey="Guid" />
@@ -10,10 +13,23 @@
     [SupplyParameterFromQuery]
     public string? ReturnURl { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (userService.CurrentUser is not null)
-            nav.NavigateTo(ReturnURl ?? "/");
-        base.OnInitialized();
+        {
+            if (!string.IsNullOrEmpty(ReturnURl))
+            {
+                nav.NavigateTo(ReturnURl);
+            }
+            else
+            {
+                var appBasePath = config.GetSection("AppBasePath").Value?.TrimEnd('/') ?? "/";
+                if (!string.IsNullOrWhiteSpace(appBasePath) && !appBasePath.StartsWith("/"))
+                {
+                    appBasePath = "/" + appBasePath;
+                }
+                nav.NavigateTo(appBasePath);
+            }
+        }
     }
 }
